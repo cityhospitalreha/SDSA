@@ -1,0 +1,857 @@
+
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: var(--font-sans); }
+.app { max-width: 380px; margin: 0 auto; min-height: 600px; }
+.screen { display: none; padding: 0; }
+.screen.active { display: block; }
+
+/* HOME */
+.home-header {
+  background: var(--color-background-secondary);
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  padding: 20px 20px 16px;
+}
+.home-header h1 { font-size: 18px; font-weight: 500; color: var(--color-text-primary); }
+.home-header p { font-size: 13px; color: var(--color-text-secondary); margin-top: 3px; }
+
+.home-warning {
+  margin: 12px 16px 0;
+  padding: 10px 12px;
+  background: #FFF8E1;
+  border: 0.5px solid #F9C825;
+  border-radius: var(--border-radius-md);
+  font-size: 12px; color: #7A5A00;
+  display: flex; align-items: flex-start; gap: 8px;
+}
+.home-warning i { font-size: 14px; color: #F9A825; margin-top: 1px; flex-shrink: 0; }
+
+.home-main-btn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: calc(100% - 32px); padding: 20px;
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  margin: 12px 16px 0;
+  cursor: pointer; text-align: left;
+}
+.home-main-btn:active { opacity: 0.7; }
+.home-main-btn-inner { display: flex; align-items: center; gap: 14px; }
+.home-main-icon {
+  width: 48px; height: 48px; border-radius: 12px;
+  background: #E1F5EE; display: flex; align-items: center; justify-content: center;
+}
+.home-main-icon i { font-size: 24px; color: #0F6E56; }
+.home-main-label { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+.home-main-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+
+.home-sub-btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 12px 16px 16px; }
+.home-sub-btn {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 6px;
+  padding: 14px; background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg); cursor: pointer;
+}
+.home-sub-btn:active { opacity: 0.7; }
+.home-sub-btn i { font-size: 20px; color: var(--color-text-secondary); }
+.home-sub-btn span { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+
+/* ANALYZING */
+.analyzing-wrap {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 60px 24px; min-height: 400px; justify-content: center;
+}
+.analyzing-preview {
+  width: 200px; height: 140px;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-lg);
+  margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden; position: relative;
+}
+.analyzing-preview img { width: 100%; height: 100%; object-fit: cover; border-radius: 11px; display: none; }
+.steps { width: 100%; max-width: 260px; }
+.step-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 8px 0; font-size: 13px; color: var(--color-text-tertiary);
+  border-bottom: 0.5px solid var(--color-border-tertiary); transition: color 0.3s;
+}
+.step-item:last-child { border-bottom: none; }
+.step-item.done { color: var(--color-text-primary); }
+.step-item.active { color: var(--color-text-primary); font-weight: 500; }
+.step-dot {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; font-size: 10px;
+}
+.step-item.done .step-dot { background: #E1F5EE; border-color: #5DCAA5; color: #0F6E56; }
+.step-item.active .step-dot { background: #E6F1FB; border-color: #85B7EB; color: #185FA5; }
+.analyzing-label { margin-top: 20px; font-size: 13px; color: var(--color-text-secondary); }
+
+/* RESULT */
+.result-header {
+  padding: 16px 16px 12px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  display: flex; align-items: center; justify-content: space-between;
+}
+.result-header-left { font-size: 14px; color: var(--color-text-secondary); }
+.result-header-date { font-size: 12px; color: var(--color-text-tertiary); }
+.result-hero {
+  padding: 24px 16px 20px;
+  display: flex; flex-direction: column; align-items: center;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.miss-label { font-size: 13px; color: var(--color-text-secondary); letter-spacing: 0.03em; }
+.miss-number { font-size: 72px; font-weight: 500; color: #A32D2D; line-height: 1; margin: 4px 0 2px; }
+.miss-unit { font-size: 14px; color: #A32D2D; }
+.result-sub-row {
+  display: flex; gap: 10px; padding: 14px 16px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.result-sub-card {
+  flex: 1; padding: 12px;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md); text-align: center;
+}
+.result-sub-card .val { font-size: 22px; font-weight: 500; color: var(--color-text-primary); }
+.result-sub-card .lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+.result-sub-card.correct .val { color: #3B6D11; }
+.result-sub-card.error .val { color: #BA7517; }
+.region-bar { padding: 14px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.region-title { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 10px; }
+.region-row { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+.region-name { font-size: 12px; color: var(--color-text-secondary); width: 24px; flex-shrink: 0; }
+.region-track { flex: 1; height: 6px; background: var(--color-background-secondary); border-radius: 3px; overflow: hidden; }
+.region-fill { height: 100%; background: #F09595; border-radius: 3px; transition: width 0.6s ease; }
+.region-num { font-size: 12px; font-weight: 500; color: #A32D2D; min-width: 20px; text-align: right; }
+.result-img-area { padding: 14px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.result-img-area .label { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 10px; }
+.result-img-box {
+  width: 100%; height: 160px;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+}
+.result-img-box img { width: 100%; height: 100%; object-fit: cover; display: none; border-radius: 7px; }
+.result-img-placeholder { font-size: 12px; color: var(--color-text-tertiary); text-align: center; line-height: 1.6; }
+.legend-row { display: flex; gap: 14px; margin-top: 10px; }
+.legend-item { display: flex; align-items: center; gap: 4px; font-size: 11px; color: var(--color-text-secondary); }
+.legend-dot { width: 12px; height: 12px; border-radius: 50%; border: 1.5px solid; display: flex; align-items: center; justify-content: center; font-size: 7px; font-weight: 700; }
+.result-ai-note {
+  margin: 0 16px 2px;
+  padding: 10px 12px;
+  border-radius: var(--border-radius-md);
+  border-left: 3px solid #5DCAA5;
+  background: var(--color-background-secondary);
+  font-size: 11px; color: var(--color-text-secondary); line-height: 1.6;
+}
+.result-ai-note.err { border-left-color: #A32D2D; }
+.result-ai-note strong { color: var(--color-text-primary); font-size: 11px; }
+.result-actions { padding: 14px 16px 20px; display: flex; gap: 10px; }
+.result-actions button {
+  flex: 1; padding: 12px;
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: 13px; cursor: pointer;
+  color: var(--color-text-primary);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+}
+.result-actions button:active { opacity: 0.7; }
+.result-actions button:disabled { opacity: 0.5; cursor: default; }
+.btn-green { background: #0F6E56 !important; border-color: #0F6E56 !important; color: white !important; }
+
+/* HISTORY */
+.screen-header {
+  padding: 16px;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  display: flex; align-items: center; gap: 10px;
+}
+.back-btn {
+  width: 32px; height: 32px; border-radius: var(--border-radius-md);
+  border: 0.5px solid var(--color-border-tertiary);
+  background: transparent; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-secondary);
+}
+.screen-header h2 { font-size: 16px; font-weight: 500; color: var(--color-text-primary); }
+.history-list { padding: 8px 16px; }
+.history-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+  cursor: pointer;
+}
+.history-item:last-child { border-bottom: none; }
+.history-item:active { opacity: 0.7; }
+.history-date { font-size: 13px; color: var(--color-text-primary); }
+.history-meta { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+.history-miss { font-size: 16px; font-weight: 500; color: #A32D2D; }
+.history-miss-label { font-size: 11px; color: var(--color-text-tertiary); }
+.history-chevron { color: var(--color-text-tertiary); font-size: 16px; }
+.history-empty { padding: 56px 16px; text-align: center; font-size: 13px; color: var(--color-text-tertiary); line-height: 2; }
+
+/* SETTINGS */
+.settings-section { padding: 12px 16px 0; }
+.settings-section-title { font-size: 11px; color: var(--color-text-tertiary); letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; }
+.settings-item {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 0.5px solid var(--color-border-tertiary);
+}
+.settings-item:last-child { border-bottom: none; }
+.settings-label { font-size: 14px; color: var(--color-text-primary); }
+.settings-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+.toggle {
+  width: 40px; height: 24px; border-radius: 12px;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-secondary);
+  position: relative; cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+}
+.toggle.on { background: #1D9E75; border-color: #1D9E75; }
+.toggle-thumb {
+  position: absolute; top: 3px; left: 3px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: white; transition: left 0.2s;
+}
+.toggle.on .toggle-thumb { left: 19px; }
+
+/* API KEY FORM */
+.api-key-section { padding: 12px 16px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.api-key-section label { font-size: 11px; color: var(--color-text-tertiary); letter-spacing: 0.05em; text-transform: uppercase; display: block; margin-bottom: 8px; }
+.api-key-row { display: flex; gap: 8px; }
+.api-key-input {
+  flex: 1; padding: 10px 12px;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: 12px; font-family: monospace;
+  color: var(--color-text-primary); outline: none;
+}
+.api-key-input:focus { border-color: #5DCAA5; }
+.api-save-btn {
+  padding: 10px 14px; background: #0F6E56; border: none;
+  border-radius: var(--border-radius-md);
+  color: white; font-size: 13px; cursor: pointer; white-space: nowrap;
+}
+.api-save-btn:active { opacity: 0.7; }
+.api-status { font-size: 11px; margin-top: 6px; }
+.api-status.ok { color: #0F6E56; }
+.api-status.none { color: var(--color-text-tertiary); }
+
+/* REF PAPER */
+.ref-section { padding: 12px 16px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.ref-section label { font-size: 11px; color: var(--color-text-tertiary); letter-spacing: 0.05em; text-transform: uppercase; display: block; margin-bottom: 8px; }
+.ref-preview {
+  width: 100%; height: 90px;
+  background: var(--color-background-secondary);
+  border: 0.5px dashed var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; overflow: hidden; margin-bottom: 6px;
+}
+.ref-preview img { width: 100%; height: 100%; object-fit: cover; display: none; }
+.ref-placeholder { font-size: 12px; color: var(--color-text-tertiary); text-align: center; line-height: 1.8; }
+.ref-status { font-size: 11px; }
+.ref-status.ok { color: #0F6E56; }
+.ref-status.none { color: var(--color-text-tertiary); }
+
+/* CONFIRM OVERLAY */
+.confirm-overlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.4); z-index: 100;
+  align-items: center; justify-content: center;
+}
+.confirm-overlay.show { display: flex; }
+.confirm-box {
+  background: var(--color-background-primary);
+  border-radius: 16px; padding: 24px 20px 16px;
+  width: 280px; text-align: center;
+}
+.confirm-box h3 { font-size: 16px; font-weight: 500; margin-bottom: 8px; color: var(--color-text-primary); }
+.confirm-box p { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 20px; line-height: 1.6; }
+.confirm-btns { display: flex; gap: 8px; }
+.confirm-btns button { flex: 1; padding: 12px; border-radius: var(--border-radius-md); font-size: 14px; cursor: pointer; }
+.btn-cancel-d { background: var(--color-background-secondary); border: 0.5px solid var(--color-border-secondary); color: var(--color-text-primary); }
+.btn-delete-d { background: #A32D2D; border: none; color: white; }
+
+#file-input, #ref-input { display: none; }
+</style>
+
+<input type="file" id="file-input" accept="image/*" capture="environment">
+<input type="file" id="ref-input" accept="image/*">
+
+<div class="confirm-overlay" id="confirm-overlay">
+  <div class="confirm-box">
+    <h3>履歴を削除</h3>
+    <p>保存されたすべての検査データを削除します。この操作は取り消せません。</p>
+    <div class="confirm-btns">
+      <button class="btn-cancel-d" id="confirm-cancel">キャンセル</button>
+      <button class="btn-delete-d" id="confirm-delete">削除する</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+
+<!-- HOME -->
+<div class="screen active" id="screen-home">
+  <div class="home-header">
+    <h1>点群探索検査</h1>
+    <p>4点群探索 採点アプリ</p>
+  </div>
+  <div id="warn-api" class="home-warning" style="display:none;">
+    <i class="ti ti-alert-triangle" aria-hidden="true"></i>
+    <span>Gemini APIキーが未設定です。設定から登録してください。</span>
+  </div>
+  <div id="warn-ref" class="home-warning" style="display:none;margin-top:6px;">
+    <i class="ti ti-info-circle" aria-hidden="true"></i>
+    <span>正解例を登録すると、採点精度が上がります。</span>
+  </div>
+  <button class="home-main-btn" id="btn-select-photo">
+    <div class="home-main-btn-inner">
+      <div class="home-main-icon"><i class="ti ti-camera" aria-hidden="true"></i></div>
+      <div>
+        <div class="home-main-label">画像を選んで採点</div>
+        <div class="home-main-sub">カメラロールから選択 → AI解析</div>
+      </div>
+    </div>
+    <i class="ti ti-chevron-right" aria-hidden="true" style="color:var(--color-text-tertiary);font-size:18px;"></i>
+  </button>
+  <div class="home-sub-btns">
+    <button class="home-sub-btn" id="btn-go-history">
+      <i class="ti ti-history" aria-hidden="true"></i>
+      <span>検査履歴</span>
+    </button>
+    <button class="home-sub-btn" id="btn-go-settings">
+      <i class="ti ti-settings" aria-hidden="true"></i>
+      <span>設定</span>
+    </button>
+  </div>
+</div>
+
+<!-- ANALYZING -->
+<div class="screen" id="screen-analyzing">
+  <div class="analyzing-wrap">
+    <div class="analyzing-preview">
+      <img id="preview-img" alt="">
+      <span id="preview-placeholder"><i class="ti ti-photo" style="font-size:32px;color:var(--color-text-tertiary);" aria-hidden="true"></i></span>
+    </div>
+    <div class="steps">
+      <div class="step-item" id="step-1"><div class="step-dot"></div>用紙認識</div>
+      <div class="step-item" id="step-2"><div class="step-dot"></div>傾き補正</div>
+      <div class="step-item" id="step-3"><div class="step-dot"></div>点群位置照合</div>
+      <div class="step-item" id="step-4"><div class="step-dot"></div>丸認識</div>
+      <div class="step-item" id="step-5"><div class="step-dot"></div>AI採点</div>
+    </div>
+    <div class="analyzing-label" id="analyzing-label">解析中…</div>
+  </div>
+</div>
+
+<!-- RESULT -->
+<div class="screen" id="screen-result">
+  <div class="result-header">
+    <span class="result-header-left">検査結果</span>
+    <span class="result-header-date" id="result-date"></span>
+  </div>
+  <div class="result-hero">
+    <div class="miss-label">見落とし</div>
+    <div class="miss-number" id="result-miss">-</div>
+    <div class="miss-unit">個</div>
+  </div>
+  <div class="result-sub-row">
+    <div class="result-sub-card correct">
+      <div class="val" id="result-correct">-</div>
+      <div class="lbl">正答</div>
+    </div>
+    <div class="result-sub-card error">
+      <div class="val" id="result-error">-</div>
+      <div class="lbl">誤反応</div>
+    </div>
+  </div>
+  <div class="region-bar">
+    <div class="region-title">エリア別見落とし（左右分析）</div>
+    <div class="region-row">
+      <span class="region-name">左</span>
+      <div class="region-track"><div class="region-fill" id="rf-left" style="width:0%"></div></div>
+      <span class="region-num" id="rn-left">-</span>
+    </div>
+    <div class="region-row">
+      <span class="region-name">中</span>
+      <div class="region-track"><div class="region-fill" id="rf-center" style="width:0%"></div></div>
+      <span class="region-num" id="rn-center">-</span>
+    </div>
+    <div class="region-row">
+      <span class="region-name">右</span>
+      <div class="region-track"><div class="region-fill" id="rf-right" style="width:0%"></div></div>
+      <span class="region-num" id="rn-right">-</span>
+    </div>
+  </div>
+  <div class="result-img-area">
+    <div class="label">撮影した用紙</div>
+    <div class="result-img-box">
+      <img id="result-overlay-img" alt="採点済み画像">
+      <div class="result-img-placeholder" id="result-img-placeholder">画像が表示されます</div>
+    </div>
+    <div class="legend-row">
+      <div class="legend-item"><div class="legend-dot" style="border-color:#3B6D11;color:#3B6D11;">○</div>正答</div>
+      <div class="legend-item"><div class="legend-dot" style="border-color:#A32D2D;color:#A32D2D;">×</div>見落とし</div>
+      <div class="legend-item"><div class="legend-dot" style="border-color:#BA7517;color:#BA7517;">△</div>誤反応</div>
+    </div>
+  </div>
+  <div id="result-ai-note" class="result-ai-note" style="display:none;">
+    <strong>AIメモ：</strong><span id="result-ai-text"></span>
+  </div>
+  <div class="result-actions">
+    <button id="btn-save" class="btn-green"><i class="ti ti-bookmark" aria-hidden="true"></i>保存する</button>
+    <button id="btn-retake"><i class="ti ti-camera" aria-hidden="true"></i>再撮影</button>
+  </div>
+</div>
+
+<!-- HISTORY -->
+<div class="screen" id="screen-history">
+  <div class="screen-header">
+    <button class="back-btn" id="btn-history-back"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <h2>検査履歴</h2>
+  </div>
+  <div id="history-list-wrap"></div>
+</div>
+
+<!-- SETTINGS -->
+<div class="screen" id="screen-settings">
+  <div class="screen-header">
+    <button class="back-btn" id="btn-settings-back"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
+    <h2>設定</h2>
+  </div>
+
+  <div class="api-key-section">
+    <label>Gemini API キー</label>
+    <div class="api-key-row">
+      <input type="password" class="api-key-input" id="api-key-input" placeholder="AIza..." autocomplete="off" spellcheck="false">
+      <button class="api-save-btn" id="btn-save-apikey">保存</button>
+    </div>
+    <div class="api-status none" id="api-key-status">未設定</div>
+  </div>
+
+  <div class="ref-section">
+    <label>正解例（赤ペンで正解位置をマークした用紙）</label>
+    <div class="ref-preview" id="ref-paper-preview">
+      <img id="ref-paper-img" alt="正解例">
+      <div class="ref-placeholder" id="ref-paper-placeholder">
+        <i class="ti ti-file-description" style="font-size:24px;display:block;margin-bottom:4px;" aria-hidden="true"></i>
+        タップして登録
+      </div>
+    </div>
+    <div class="ref-status none" id="ref-paper-status">未登録（登録すると精度が上がります）</div>
+  </div>
+
+  <div class="settings-section">
+    <div class="settings-section-title">解析オプション</div>
+    <div class="settings-item">
+      <div>
+        <div class="settings-label">左右分析</div>
+        <div class="settings-sub">エリア別の見落としを表示</div>
+      </div>
+      <div class="toggle on" id="toggle-region" role="switch" aria-checked="true" aria-label="左右分析">
+        <div class="toggle-thumb"></div>
+      </div>
+    </div>
+    <div class="settings-item">
+      <div>
+        <div class="settings-label">自動保存</div>
+        <div class="settings-sub">採点後に自動で履歴に保存</div>
+      </div>
+      <div class="toggle on" id="toggle-autosave" role="switch" aria-checked="true" aria-label="自動保存">
+        <div class="toggle-thumb"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="settings-section" style="margin-top:8px;">
+    <div class="settings-section-title">データ</div>
+    <div class="settings-item" id="btn-clear-history" style="cursor:pointer;">
+      <div>
+        <div class="settings-label" style="color:#A32D2D;">履歴をすべて削除</div>
+        <div class="settings-sub">保存した検査データを消去</div>
+      </div>
+      <i class="ti ti-chevron-right" aria-hidden="true" style="color:#A32D2D;"></i>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<script>
+// ── ストレージキー ──
+const K_HISTORY  = 'dotcluster_history';
+const K_APIKEY   = 'dotcluster_apikey';
+const K_REFPAPER = 'dotcluster_refpaper';
+const K_SETTINGS = 'dotcluster_settings';
+
+// ── 状態 ──
+let currentResult = null;
+let currentImgSrc = null;
+let alreadySaved  = false;
+
+// ── ユーティリティ ──
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function fmtDate(d) {
+  const dt = d instanceof Date ? d : new Date(d);
+  return `${dt.getFullYear()}/${String(dt.getMonth()+1).padStart(2,'0')}/${String(dt.getDate()).padStart(2,'0')} ${String(dt.getHours()).padStart(2,'0')}:${String(dt.getMinutes()).padStart(2,'0')}`;
+}
+
+// ── localStorage ──
+function loadHistory()   { try { return JSON.parse(localStorage.getItem(K_HISTORY)||'[]'); } catch(e){ return []; } }
+function saveHistory(l)  { localStorage.setItem(K_HISTORY, JSON.stringify(l)); }
+function getApiKey()     { return localStorage.getItem(K_APIKEY)||''; }
+function setApiKey(k)    { localStorage.setItem(K_APIKEY, k); }
+function getRefPaper()   { return localStorage.getItem(K_REFPAPER)||''; }
+function setRefPaper(d)  { localStorage.setItem(K_REFPAPER, d); }
+function getSettings()   { try { return JSON.parse(localStorage.getItem(K_SETTINGS)||'{"region":true,"autosave":true}'); } catch(e){ return {region:true,autosave:true}; } }
+function saveSettings(s) { localStorage.setItem(K_SETTINGS, JSON.stringify(s)); }
+
+// ── 設定UI更新 ──
+function refreshSettingsUI() {
+  const key = getApiKey();
+  document.getElementById('api-key-input').value = key;
+  const aSt = document.getElementById('api-key-status');
+  if (key) { aSt.textContent='設定済み ✓'; aSt.className='api-status ok'; }
+  else     { aSt.textContent='未設定';    aSt.className='api-status none'; }
+
+  const ref = getRefPaper();
+  const ri  = document.getElementById('ref-paper-img');
+  const rph = document.getElementById('ref-paper-placeholder');
+  const rst = document.getElementById('ref-paper-status');
+  if (ref) {
+    ri.src=ref; ri.style.display='block'; rph.style.display='none';
+    rst.textContent='登録済み ✓'; rst.className='ref-status ok';
+  } else {
+    ri.style.display='none'; rph.style.display='flex';
+    rst.textContent='未登録（登録すると精度が上がります）'; rst.className='ref-status none';
+  }
+
+  const s = getSettings();
+  setToggle('toggle-region', s.region);
+  setToggle('toggle-autosave', s.autosave);
+}
+
+function refreshHomeWarnings() {
+  document.getElementById('warn-api').style.display = getApiKey() ? 'none' : 'flex';
+  document.getElementById('warn-ref').style.display = getRefPaper() ? 'none' : 'flex';
+}
+
+// ── トグル ──
+function setToggle(id, on) {
+  const el = document.getElementById(id);
+  if(on){ el.classList.add('on'); el.setAttribute('aria-checked','true'); }
+  else  { el.classList.remove('on'); el.setAttribute('aria-checked','false'); }
+}
+['toggle-region','toggle-autosave'].forEach(id => {
+  document.getElementById(id).addEventListener('click', () => {
+    const el = document.getElementById(id);
+    const on = el.classList.toggle('on');
+    el.setAttribute('aria-checked', on);
+    const s = getSettings();
+    if(id==='toggle-region') s.region=on;
+    if(id==='toggle-autosave') s.autosave=on;
+    saveSettings(s);
+  });
+});
+
+// ── 履歴描画 ──
+function renderHistory() {
+  const list = loadHistory();
+  const wrap = document.getElementById('history-list-wrap');
+  if(list.length===0) {
+    wrap.innerHTML='<div class="history-empty">検査履歴はまだありません。<br>採点後に「保存する」で記録されます。</div>';
+    return;
+  }
+  const html = list.slice().reverse().map(r =>
+    `<div class="history-item">
+      <div>
+        <div class="history-date">${fmtDate(r.date)}</div>
+        <div class="history-meta">正答 ${r.correct} ／ 誤反応 ${r.error}</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <div>
+          <div class="history-miss">${r.miss}</div>
+          <div class="history-miss-label">見落とし</div>
+        </div>
+        <i class="ti ti-chevron-right history-chevron" aria-hidden="true"></i>
+      </div>
+    </div>`
+  ).join('');
+  wrap.innerHTML=`<div class="history-list">${html}</div>`;
+}
+
+// ── Gemini API ──
+async function callGemini(imgSrc, refSrc) {
+  const apiKey = getApiKey();
+  if(!apiKey) throw new Error('APIキーが未設定です。設定画面から登録してください。');
+
+  const parts = [];
+
+  if(refSrc) {
+    parts.push({ inline_data:{ mime_type:'image/jpeg', data: refSrc.split(',')[1] } });
+    parts.push({ text:'これが正解例です。赤いペンで丸がついている場所が「4点クラスター（4つの点のかたまり）」の正解位置を示しています。' });
+  }
+
+  parts.push({ inline_data:{ mime_type:'image/jpeg', data: imgSrc.split(',')[1] } });
+
+  const prompt = refSrc
+    ? `これが受検者の回答済み用紙です。赤いペンで丸がついています。
+
+【検査のルール】
+この用紙には「2点・3点・4点」の点のかたまり（クラスター）が混在しています。
+正解は「4つの点のかたまり（4点クラスター）」だけに丸をつけることです。
+
+【採点基準】
+- 正答：4点クラスターに赤い丸がついている
+- 見落とし：4点クラスターなのに赤い丸がついていない（正解例の赤丸位置と比較）
+- 誤反応：2点または3点クラスターに赤い丸をつけてしまっている
+
+正解例の画像と比較しながら、用紙全体を左・中・右の3エリアに分けて採点してください。
+
+必ずJSONのみで回答（前後に説明不要）：
+{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"note":"日本語20字以内のコメント"}`
+    : `これは4点クラスター探索検査の回答済み用紙です。
+
+【検査のルール】
+用紙には「2点・3点・4点」の点のかたまり（クラスター）が混在しています。
+正解は「4つの点のかたまり（4点クラスター）」だけに丸をつけることです。
+受検者は赤いペンで丸をつけています。
+
+【採点基準】
+- 正答：4点クラスターに赤い丸がついている
+- 見落とし：4点クラスターなのに赤い丸がついていない（推定）
+- 誤反応：2点または3点クラスターに赤い丸をつけてしまっている
+
+用紙全体を左・中・右の3エリアに分けて採点してください。
+※正解例がないため見落とし数は推定になります。
+
+必ずJSONのみで回答（前後に説明不要）：
+{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"note":"日本語20字以内のコメント"}`;
+
+  parts.push({ text: prompt });
+
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+    {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ contents:[{ parts }] })
+    }
+  );
+
+  if(!res.ok) {
+    const e = await res.json().catch(()=>({}));
+    throw new Error(e?.error?.message || `APIエラー (${res.status})`);
+  }
+
+  const data = await res.json();
+  const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+  const m = text.match(/\{[\s\S]*?\}/);
+  if(!m) throw new Error('Geminiの返答を解析できませんでした');
+  return JSON.parse(m[0]);
+}
+
+// ── 解析フロー ──
+const stepLabels = ['用紙認識中…','傾き補正中…','点群照合中…','丸認識中…','AI採点中…'];
+
+function runAnalysis(imgSrc) {
+  currentImgSrc = imgSrc;
+  currentResult = null;
+  alreadySaved  = false;
+  show('screen-analyzing');
+
+  const prev = document.getElementById('preview-img');
+  prev.src=imgSrc; prev.style.display='block';
+  document.getElementById('preview-placeholder').style.display='none';
+
+  for(let n=1;n<=5;n++){
+    const el=document.getElementById('step-'+n);
+    el.className='step-item';
+    el.querySelector('.step-dot').textContent='';
+  }
+
+  let i=0;
+  let geminiPromise=null;
+
+  function tick(){
+    if(i>0){
+      const pe=document.getElementById('step-'+i);
+      pe.className='step-item done';
+      pe.querySelector('.step-dot').textContent='✓';
+    }
+    if(i<5){
+      i++;
+      document.getElementById('step-'+i).className='step-item active';
+      document.getElementById('analyzing-label').textContent=stepLabels[i-1];
+
+      if(i===4){
+        // ステップ4でGemini呼び出し開始（並行）
+        geminiPromise = callGemini(imgSrc, getRefPaper()).catch(e=>({_error:e.message}));
+      }
+
+      if(i<5){ setTimeout(tick,700); }
+      else {
+        // ステップ5：Gemini完了待ち
+        geminiPromise.then(result=>{
+          const el5=document.getElementById('step-5');
+          el5.className='step-item done';
+          el5.querySelector('.step-dot').textContent='✓';
+          document.getElementById('analyzing-label').textContent='完了';
+          setTimeout(()=>showResult(imgSrc, result), 400);
+        });
+      }
+    }
+  }
+  tick();
+}
+
+// ── 結果表示 ──
+function showResult(imgSrc, geminiData) {
+  const now = new Date();
+  document.getElementById('result-date').textContent = fmtDate(now);
+
+  if(imgSrc){
+    const ri=document.getElementById('result-overlay-img');
+    ri.src=imgSrc; ri.style.display='block';
+    document.getElementById('result-img-placeholder').style.display='none';
+  }
+
+  let miss='-', correct='-', error='-';
+  let lm='-', cm='-', rm='-';
+  let note='', isErr=false;
+
+  if(geminiData && !geminiData._error){
+    miss    = geminiData.miss    ?? '-';
+    correct = geminiData.correct ?? '-';
+    error   = geminiData.error   ?? '-';
+    lm = geminiData.left_miss   ?? '-';
+    cm = geminiData.center_miss ?? '-';
+    rm = geminiData.right_miss  ?? '-';
+    note = geminiData.note || '';
+  } else if(geminiData?._error){
+    isErr=true; note=geminiData._error;
+  }
+
+  document.getElementById('result-miss').textContent    = miss;
+  document.getElementById('result-correct').textContent = correct;
+  document.getElementById('result-error').textContent   = error;
+  document.getElementById('rn-left').textContent   = lm;
+  document.getElementById('rn-center').textContent = cm;
+  document.getElementById('rn-right').textContent  = rm;
+
+  if(!isErr && typeof miss==='number'){
+    const total=(lm||0)+(cm||0)+(rm||0)||1;
+    document.getElementById('rf-left').style.width   = Math.round(((lm||0)/total)*100)+'%';
+    document.getElementById('rf-center').style.width = Math.round(((cm||0)/total)*100)+'%';
+    document.getElementById('rf-right').style.width  = Math.round(((rm||0)/total)*100)+'%';
+  }
+
+  const noteEl = document.getElementById('result-ai-note');
+  if(note){
+    document.getElementById('result-ai-text').textContent=note;
+    noteEl.style.display='block';
+    noteEl.className = isErr ? 'result-ai-note err' : 'result-ai-note';
+  } else { noteEl.style.display='none'; }
+
+  // 保存ボタンリセット
+  const saveBtn = document.getElementById('btn-save');
+  saveBtn.innerHTML='<i class="ti ti-bookmark" aria-hidden="true"></i>保存する';
+  saveBtn.className='btn-green';
+  saveBtn.disabled=false;
+  alreadySaved=false;
+
+  // 結果保存
+  currentResult = {
+    date: now.toISOString(),
+    miss, correct, error,
+    leftMiss:lm, centerMiss:cm, rightMiss:rm,
+    note
+  };
+
+  // 自動保存
+  const s=getSettings();
+  if(s.autosave && !isErr && typeof miss==='number'){
+    addToHistory(currentResult);
+    alreadySaved=true;
+    saveBtn.innerHTML='<i class="ti ti-bookmark-filled" aria-hidden="true"></i>保存済み';
+    saveBtn.disabled=true;
+  }
+
+  show('screen-result');
+}
+
+function addToHistory(r) {
+  const list=loadHistory();
+  list.push(r);
+  saveHistory(list);
+}
+
+// ── イベント ──
+document.getElementById('btn-select-photo').addEventListener('click', ()=>document.getElementById('file-input').click());
+document.getElementById('file-input').addEventListener('change', e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=ev=>runAnalysis(ev.target.result);
+  reader.readAsDataURL(f);
+  e.target.value='';
+});
+
+document.getElementById('btn-go-history').addEventListener('click',()=>{ renderHistory(); show('screen-history'); });
+document.getElementById('btn-go-settings').addEventListener('click',()=>{ refreshSettingsUI(); show('screen-settings'); });
+document.getElementById('btn-history-back').addEventListener('click',()=>show('screen-home'));
+document.getElementById('btn-settings-back').addEventListener('click',()=>{ refreshHomeWarnings(); show('screen-home'); });
+
+document.getElementById('btn-retake').addEventListener('click',()=>show('screen-home'));
+document.getElementById('btn-save').addEventListener('click',()=>{
+  if(!currentResult || alreadySaved) return;
+  addToHistory(currentResult);
+  alreadySaved=true;
+  const btn=document.getElementById('btn-save');
+  btn.innerHTML='<i class="ti ti-bookmark-filled" aria-hidden="true"></i>保存済み';
+  btn.disabled=true;
+});
+
+document.getElementById('btn-save-apikey').addEventListener('click',()=>{
+  const val=document.getElementById('api-key-input').value.trim();
+  if(!val) return;
+  setApiKey(val);
+  const st=document.getElementById('api-key-status');
+  st.textContent='保存しました ✓'; st.className='api-status ok';
+});
+
+document.getElementById('ref-paper-preview').addEventListener('click',()=>document.getElementById('ref-input').click());
+document.getElementById('ref-input').addEventListener('change',e=>{
+  const f=e.target.files[0]; if(!f) return;
+  const reader=new FileReader();
+  reader.onload=ev=>{ setRefPaper(ev.target.result); refreshSettingsUI(); };
+  reader.readAsDataURL(f);
+  e.target.value='';
+});
+
+document.getElementById('btn-clear-history').addEventListener('click',()=>{
+  document.getElementById('confirm-overlay').classList.add('show');
+});
+document.getElementById('confirm-cancel').addEventListener('click',()=>{
+  document.getElementById('confirm-overlay').classList.remove('show');
+});
+document.getElementById('confirm-delete').addEventListener('click',()=>{
+  localStorage.removeItem(K_HISTORY);
+  document.getElementById('confirm-overlay').classList.remove('show');
+  renderHistory();
+});
+
+// ── 初期化 ──
+refreshHomeWarnings();
+</script>
