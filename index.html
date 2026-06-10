@@ -727,7 +727,7 @@ async function callGemini(imgSrc,refSrc){
     ?`これが受検者の回答済み用紙です。赤いペンで丸がついています。\n【ルール】用紙には2点・3点・4点の点のかたまりが混在。正解は「4点クラスター」だけに丸をつけること。\n【採点基準】正答:4点クラスターに赤丸あり。見落とし:4点クラスターに赤丸なし（正解例と比較）。つけ誤り:2点または3点クラスターに赤丸。\n用紙を左・中・右に分けて採点。JSONのみで回答:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"note":"日本語20字以内"}`
     :`これは4点クラスター探索検査の回答済み用紙。受検者は赤ペンで丸をつけています。\n【ルール】4点クラスターだけが正解。2点・3点クラスターへの丸はつけ誤り。\n用紙を左・中・右に分けて採点（正解例なしのため見落としは推定）。JSONのみ:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"note":"日本語20字以内"}`;
   parts.push({text:prompt});
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})});
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`APIエラー(${res.status})`);}
   const data=await res.json(); const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
   const m=text.match(/\{[\s\S]*?\}/); if(!m)throw new Error('返答を解析できませんでした');
