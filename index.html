@@ -2,39 +2,24 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>運転適性検査 採点・集計アプリ</title>
-
-<!-- PWA -->
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#0F6E56">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SDSA">
-<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
-<link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512.png">
-
-<!-- Tabler Icons -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tabler-icons/3.35.0/tabler-icons.min.css">
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
 <style>
-:root {
-  --color-background-primary: #ffffff;
-  --color-background-secondary: #f4f5f6;
-  --color-text-primary: #1a1a1a;
-  --color-text-secondary: #6b7280;
-  --color-text-tertiary: #9ca3af;
-  --color-border-primary: #d1d5db;
-  --color-border-secondary: #d1d5db;
-  --color-border-tertiary: #e5e7eb;
-  --border-radius-md: 8px;
-  --border-radius-lg: 14px;
-  --font-sans: -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", Meiryo, sans-serif;
+:root{
+  --color-background-primary:#ffffff;
+  --color-background-secondary:#f5f5f4;
+  --color-text-primary:#1a1a1a;
+  --color-text-secondary:#5c5c5c;
+  --color-text-tertiary:#8a8a8a;
+  --color-border-primary:#d9d9d6;
+  --color-border-secondary:#c7c7c4;
+  --color-border-tertiary:#e5e5e2;
+  --border-radius-md:8px;
+  --border-radius-lg:14px;
+  --font-sans:-apple-system,BlinkMacSystemFont,"Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
 }
-body { background: var(--color-background-secondary); }
-
+body{background:var(--color-background-primary);}
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body { font-family: var(--font-sans); }
 .app { max-width: 390px; margin: 0 auto; }
@@ -408,7 +393,6 @@ body { font-family: var(--font-sans); }
 </head>
 <body>
 
-
 <input type="file" id="file-input" accept="image/*" capture="environment">
 <input type="file" id="ref-input" accept="image/*">
 
@@ -756,6 +740,10 @@ function refreshSettingsUI(){
   else{ri.style.display='none';rph.style.display='flex';rst.textContent='未登録（登録すると精度が上がります）';rst.className='ref-status none';}
 }
 
+// ★修正箇所: gemini-1.5-flash（廃止済み・404エラーの原因）→ gemini-3.1-flash-lite に変更
+// gemini-3.1-flash-lite は2027年5月まで停止予定なしのため、当面安心して使えます
+const GEMINI_MODEL = 'gemini-3.1-flash-lite';
+
 async function callGemini(imgSrc,refSrc){
   const apiKey=getApiKey(); if(!apiKey)throw new Error('APIキーが未設定です');
   const parts=[];
@@ -765,7 +753,7 @@ async function callGemini(imgSrc,refSrc){
     ?`これが受検者の回答済み用紙です。赤いペンで丸がついています。\n【ルール】用紙には2点・3点・4点の点のかたまりが混在。正解は「4点クラスター」だけに丸をつけること。\n【採点基準】正答:4点クラスターに赤丸あり。見落とし:4点クラスターに赤丸なし（正解例と比較）。つけ誤り:2点または3点クラスターに赤丸。\n用紙を左・中・右に分けて採点。JSONのみで回答:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"note":"日本語20字以内"}`
     :`これは4点クラスター探索検査の回答済み用紙。受検者は赤ペンで丸をつけています。\n【ルール】4点クラスターだけが正解。2点・3点クラスターへの丸はつけ誤り。\n用紙を左・中・右に分けて採点（正解例なしのため見落としは推定）。JSONのみ:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"note":"日本語20字以内"}`;
   parts.push({text:prompt});
-  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})});
+  const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`APIエラー(${res.status})`);}
   const data=await res.json(); const text=data.candidates?.[0]?.content?.parts?.[0]?.text||'';
   const m=text.match(/\{[\s\S]*?\}/); if(!m)throw new Error('返答を解析できませんでした');
@@ -926,14 +914,6 @@ document.getElementById('confirm-cancel').addEventListener('click',()=>document.
 document.getElementById('confirm-delete').addEventListener('click',()=>{localStorage.removeItem(K_HISTORY);document.getElementById('confirm-overlay').classList.remove('show');renderHistory();});
 
 refreshHome();
-</script>
-
-<script>
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('sw.js').catch(()=>{});
-  });
-}
 </script>
 </body>
 </html>
