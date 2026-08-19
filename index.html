@@ -90,9 +90,10 @@ body { font-family: var(--font-sans); }
   padding: 12px 14px; margin-bottom: 8px;
   background: var(--color-background-primary);
   border: 0.5px solid var(--color-border-tertiary);
-  border-radius: var(--border-radius-lg); cursor: pointer;
+  border-radius: var(--border-radius-lg); cursor: default;
 }
-.task-card:active { opacity: 0.7; }
+.task-card.pressable { cursor: pointer; }
+.task-card.pressable:active { opacity: 0.7; }
 .task-card-left { display: flex; align-items: center; gap: 10px; }
 .task-icon {
   width: 38px; height: 38px; border-radius: 10px;
@@ -106,6 +107,57 @@ body { font-family: var(--font-sans); }
 .task-sub  { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
 .task-status { font-size: 12px; color: var(--color-text-tertiary); white-space: nowrap; }
 .task-status.done { color: #0F6E56; font-weight: 500; }
+
+.timer-btn {
+  width: 100%; margin: -3px 0 8px; padding: 8px;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-tertiary);
+  border-radius: var(--border-radius-md);
+  font-size: 12px; color: var(--color-text-secondary); cursor: pointer;
+  font-variant-numeric: tabular-nums;
+}
+.timer-btn.running {
+  background: #FDEDED; border-color: #F0B4B4; color: #A32D2D; font-weight: 500;
+}
+.timer-btn:active { opacity: 0.7; }
+
+.dot-action-row { display: flex; gap: 6px; margin: -3px 0 6px; }
+.dot-action-btn {
+  flex: 1; padding: 9px; display: flex; align-items: center; justify-content: center; gap: 6px;
+  background: var(--color-background-primary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: 13px; color: var(--color-text-primary); cursor: pointer;
+}
+.dot-action-btn:active { opacity: 0.7; }
+.dot-action-btn.primary { background: #0F6E56; border-color: #0F6E56; color: white; }
+.dot-action-btn:disabled { opacity: 0.4; cursor: default; background: var(--color-background-secondary); color: var(--color-text-tertiary); border-color: var(--color-border-tertiary); }
+.dot-capture-status {
+  margin: -3px 0 10px; padding: 7px 11px;
+  background: var(--color-background-secondary); border-radius: var(--border-radius-md);
+  font-size: 12px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 6px;
+}
+.dot-capture-status img { width: 32px; height: 32px; object-fit: cover; border-radius: 6px; }
+
+.inline-input-row {
+  display: flex; gap: 6px; align-items: center;
+  margin: -3px 0 10px;
+}
+.inline-score-input, .inline-time-input {
+  padding: 8px 6px; text-align: center;
+  background: var(--color-background-secondary);
+  border: 0.5px solid var(--color-border-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: 14px; font-weight: 500; color: var(--color-text-primary); outline: none;
+}
+.inline-score-input { flex: 1.2; min-width: 0; }
+.inline-time-input { flex: 1; min-width: 0; }
+.inline-score-input:focus, .inline-time-input:focus { border-color: #5DCAA5; }
+.inline-save-btn {
+  padding: 8px 12px; background: #0F6E56; border: none;
+  border-radius: var(--border-radius-md); color: white; font-size: 13px; cursor: pointer; flex-shrink: 0;
+}
+.inline-save-btn:active { opacity: 0.8; }
 
 .summary-btn {
   display: flex; align-items: center; justify-content: center; gap: 8px;
@@ -184,6 +236,20 @@ body { font-family: var(--font-sans); }
   border-radius: var(--border-radius-md); text-align: center;
 }
 .result-card .val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+.val-input {
+  width: 100%; border: none; background: transparent; outline: none;
+  font-size: 20px; font-weight: 500; text-align: center;
+  color: var(--color-text-primary); font-family: inherit;
+  border-bottom: 1.5px dashed var(--color-border-secondary);
+  padding-bottom: 2px;
+}
+.val-input:focus { border-bottom-color: #5DCAA5; }
+.ai-confirm-note {
+  margin: 0 16px 4px; padding: 8px 11px;
+  background: var(--color-background-secondary);
+  border-radius: var(--border-radius-md);
+  font-size: 11px; color: var(--color-text-secondary); line-height: 1.6;
+}
 .result-card .lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 1px; }
 .result-card.c .val { color: #3B6D11; }
 .result-card.e .val { color: #BA7517; }
@@ -442,11 +508,17 @@ body { font-family: var(--font-sans); }
         <div class="task-icon dot"><i class="ti ti-circle-dotted" style="color:#0F6E56;" aria-hidden="true"></i></div>
         <div>
           <div class="task-name">ドット課題</div>
-          <div class="task-sub" id="sub-dot">カメラ撮影 → AI採点</div>
+          <div class="task-sub" id="sub-dot">下のボタンで撮影・採点</div>
         </div>
       </div>
       <div class="task-status" id="status-dot">未実施</div>
     </div>
+    <button class="timer-btn" id="timer-btn-dot">⏱ 計測開始</button>
+    <div class="dot-action-row">
+      <button class="dot-action-btn" id="btn-dot-capture"><i class="ti ti-camera" aria-hidden="true"></i>写真を撮る</button>
+      <button class="dot-action-btn primary" id="btn-dot-analyze" disabled><i class="ti ti-sparkles" aria-hidden="true"></i>自動採点する</button>
+    </div>
+    <div class="dot-capture-status" id="dot-capture-status" style="display:none;"></div>
     <div class="task-card" id="card-dir1">
       <div class="task-card-left">
         <div class="task-icon dir"><i class="ti ti-compass" style="color:#185FA5;" aria-hidden="true"></i></div>
@@ -456,6 +528,13 @@ body { font-family: var(--font-sans); }
         </div>
       </div>
       <div class="task-status" id="status-dir1">未実施</div>
+    </div>
+    <button class="timer-btn" id="timer-btn-dir1">⏱ 計測開始</button>
+    <div class="inline-input-row">
+      <input type="number" class="inline-score-input" id="dir1-score" placeholder="正答数" min="0">
+      <input type="number" class="inline-time-input" id="dir1-min" placeholder="分" min="0" max="99">
+      <input type="number" class="inline-time-input" id="dir1-sec" placeholder="秒" min="0" max="59">
+      <button class="inline-save-btn" id="btn-dir1-save">保存</button>
     </div>
     <div class="task-card" id="card-dir2">
       <div class="task-card-left">
@@ -467,6 +546,13 @@ body { font-family: var(--font-sans); }
       </div>
       <div class="task-status" id="status-dir2">未実施</div>
     </div>
+    <button class="timer-btn" id="timer-btn-dir2">⏱ 計測開始</button>
+    <div class="inline-input-row">
+      <input type="number" class="inline-score-input" id="dir2-score" placeholder="正答数" min="0">
+      <input type="number" class="inline-time-input" id="dir2-min" placeholder="分" min="0" max="99">
+      <input type="number" class="inline-time-input" id="dir2-sec" placeholder="秒" min="0" max="59">
+      <button class="inline-save-btn" id="btn-dir2-save">保存</button>
+    </div>
     <div class="task-card" id="card-sign">
       <div class="task-card-left">
         <div class="task-icon sign"><i class="ti ti-road-sign" style="color:#BA7517;" aria-hidden="true"></i></div>
@@ -477,7 +563,15 @@ body { font-family: var(--font-sans); }
       </div>
       <div class="task-status" id="status-sign">未実施</div>
     </div>
+    <button class="timer-btn" id="timer-btn-sign">⏱ 計測開始</button>
+    <div class="inline-input-row">
+      <input type="number" class="inline-score-input" id="sign-score" placeholder="正答数" min="0">
+      <input type="number" class="inline-time-input" id="sign-min" placeholder="分" min="0" max="99">
+      <input type="number" class="inline-time-input" id="sign-sec" placeholder="秒" min="0" max="59">
+      <button class="inline-save-btn" id="btn-sign-save">保存</button>
+    </div>
   </div>
+
   <button class="summary-btn" id="btn-go-summary" disabled>
     <i class="ti ti-chart-bar" aria-hidden="true"></i>集計・合否を確認
   </button>
@@ -527,13 +621,14 @@ body { font-family: var(--font-sans); }
     <span>正解例</span><small id="dot-ref-used">-</small>
   </div>
   <div class="result-hero">
-    <div class="miss-label">見落とし</div>
+    <div class="miss-label">見落とし（自動計算）</div>
     <div class="miss-number" id="dot-miss">-</div>
     <div class="miss-unit">個</div>
   </div>
+  <div class="ai-confirm-note">AIの採点結果です。数字が違う場合はここで直接修正できます（何も触らなければAIの数値のまま使われます）。</div>
   <div class="result-row">
-    <div class="result-card c"><div class="val" id="dot-correct">-</div><div class="lbl">正答</div></div>
-    <div class="result-card e"><div class="val" id="dot-error">-</div><div class="lbl">つけ誤り</div></div>
+    <div class="result-card c"><input type="number" class="val-input" id="dot-correct" min="0"><div class="lbl">正答</div></div>
+    <div class="result-card e"><input type="number" class="val-input" id="dot-error" min="0"><div class="lbl">つけ誤り</div></div>
   </div>
   <div class="region-bar">
     <div class="region-title">エリア別正答数（丸の数）</div>
@@ -560,84 +655,6 @@ body { font-family: var(--font-sans); }
   <div class="result-actions">
     <button id="btn-dot-save" class="btn-green"><i class="ti ti-check" aria-hidden="true"></i>この結果を使う</button>
     <button id="btn-dot-retake"><i class="ti ti-camera" aria-hidden="true"></i>撮り直す</button>
-  </div>
-</div>
-
-<!-- 方向問題① -->
-<div class="screen" id="screen-dir1">
-  <div class="screen-header">
-    <button class="back-btn" id="btn-dir1-back"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
-    <h2>方向問題①</h2>
-    <span class="badge" id="badge-dir1">未入力</span>
-  </div>
-  <div class="manual-body">
-    <div class="manual-desc">採点後の正答数を入力してください。</div>
-    <div class="input-wrap">
-      <label>正答数</label>
-      <input type="number" class="big-input" id="dir1-score" placeholder="0" min="0">
-    </div>
-    <div class="input-wrap">
-      <label>所要時間</label>
-      <div class="time-row">
-        <input type="number" class="time-input" id="dir1-min" placeholder="0" min="0" max="99">
-        <span class="time-unit">分</span>
-        <input type="number" class="time-input" id="dir1-sec" placeholder="0" min="0" max="59">
-        <span class="time-unit">秒</span>
-      </div>
-    </div>
-    <button class="save-btn" id="btn-dir1-save">保存する</button>
-  </div>
-</div>
-
-<!-- 方向問題② -->
-<div class="screen" id="screen-dir2">
-  <div class="screen-header">
-    <button class="back-btn" id="btn-dir2-back"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
-    <h2>方向問題②</h2>
-    <span class="badge" id="badge-dir2">未入力</span>
-  </div>
-  <div class="manual-body">
-    <div class="manual-desc">採点後の正答数を入力してください。</div>
-    <div class="input-wrap">
-      <label>正答数</label>
-      <input type="number" class="big-input" id="dir2-score" placeholder="0" min="0">
-    </div>
-    <div class="input-wrap">
-      <label>所要時間</label>
-      <div class="time-row">
-        <input type="number" class="time-input" id="dir2-min" placeholder="0" min="0" max="99">
-        <span class="time-unit">分</span>
-        <input type="number" class="time-input" id="dir2-sec" placeholder="0" min="0" max="59">
-        <span class="time-unit">秒</span>
-      </div>
-    </div>
-    <button class="save-btn" id="btn-dir2-save">保存する</button>
-  </div>
-</div>
-
-<!-- 標識問題 -->
-<div class="screen" id="screen-sign">
-  <div class="screen-header">
-    <button class="back-btn" id="btn-sign-back"><i class="ti ti-arrow-left" aria-hidden="true"></i></button>
-    <h2>標識問題</h2>
-    <span class="badge" id="badge-sign">未入力</span>
-  </div>
-  <div class="manual-body">
-    <div class="manual-desc">採点後の正答数を入力してください。</div>
-    <div class="input-wrap">
-      <label>正答数</label>
-      <input type="number" class="big-input" id="sign-score" placeholder="0" min="0">
-    </div>
-    <div class="input-wrap">
-      <label>所要時間</label>
-      <div class="time-row">
-        <input type="number" class="time-input" id="sign-min" placeholder="0" min="0" max="99">
-        <span class="time-unit">分</span>
-        <input type="number" class="time-input" id="sign-sec" placeholder="0" min="0" max="59">
-        <span class="time-unit">秒</span>
-      </div>
-    </div>
-    <button class="save-btn" id="btn-sign-save">保存する</button>
   </div>
 </div>
 
@@ -759,6 +776,59 @@ const K_HISTORY='drv_history', K_APIKEY='drv_apikey', K_REFPAPER='drv_refpaper',
 
 const defaultSession=()=>({ date:new Date().toISOString(), dot:null, dir1:null, dir2:null, sign:null });
 let session=defaultSession();
+
+// ★タイマー機能: 各課題ごとにストップウォッチを持つ。ページを離れる/リロードすると
+// リセットされる作りなので、計測中はタブを閉じたりページ更新をしないよう案内が必要
+let taskTimers={ dot:{running:false,start:0,elapsed:0}, dir1:{running:false,start:0,elapsed:0}, dir2:{running:false,start:0,elapsed:0}, sign:{running:false,start:0,elapsed:0} };
+let timerInterval=null;
+
+function fmtMMSS(totalSec){
+  const m=Math.floor(totalSec/60), s=totalSec%60;
+  return `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+}
+
+function toggleTimer(task){
+  const t=taskTimers[task];
+  if(!t.running){
+    t.running=true; t.start=Date.now()-t.elapsed*1000;
+    if(!timerInterval) timerInterval=setInterval(updateTimerDisplays,500);
+  } else {
+    t.running=false; t.elapsed=Math.floor((Date.now()-t.start)/1000);
+    // 停止した瞬間に、方向問題・標識問題は分秒欄へ直接反映（保存前でも見える）
+    if(task!=='dot' && document.getElementById(task+'-min')){
+      document.getElementById(task+'-min').value=Math.floor(t.elapsed/60);
+      document.getElementById(task+'-sec').value=t.elapsed%60;
+    }
+  }
+  updateTimerDisplays();
+}
+
+function updateTimerDisplays(){
+  let anyRunning=false;
+  ['dot','dir1','dir2','sign'].forEach(task=>{
+    const t=taskTimers[task];
+    if(t.running){ t.elapsed=Math.floor((Date.now()-t.start)/1000); anyRunning=true; }
+    const btn=document.getElementById('timer-btn-'+task);
+    if(!btn)return;
+    if(t.running){ btn.textContent=`⏱ ${fmtMMSS(t.elapsed)}　タップで停止`; btn.classList.add('running'); }
+    else if(t.elapsed>0){ btn.textContent=`⏱ ${fmtMMSS(t.elapsed)}（停止中・タップで再計測）`; btn.classList.remove('running'); }
+    else{ btn.textContent='⏱ 計測開始'; btn.classList.remove('running'); }
+  });
+  if(!anyRunning && timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+}
+
+function resetAllTimers(){
+  ['dot','dir1','dir2','sign'].forEach(task=>{ taskTimers[task]={running:false,start:0,elapsed:0}; });
+  if(timerInterval){ clearInterval(timerInterval); timerInterval=null; }
+  updateTimerDisplays();
+}
+
+['dot','dir1','dir2','sign'].forEach(task=>{
+  document.getElementById('timer-btn-'+task).addEventListener('click',(e)=>{
+    e.stopPropagation();
+    toggleTimer(task);
+  });
+});
 let currentImgSrc=null, currentDotResult=null;
 
 function show(id){ document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
@@ -794,16 +864,33 @@ function resizeImageDataUrl(dataUrl, maxDim, quality){
   });
 }
 
-function refreshHome(){
+function refreshHome(resetInputs){
   document.getElementById('warn-api').style.display=getApiKey()?'none':'flex';
   document.getElementById('session-name').textContent=fmtDate(session.date);
   const d=session.dot;
   if(d){ document.getElementById('status-dot').textContent=`見落とし ${d.miss}`; document.getElementById('status-dot').className='task-status done'; document.getElementById('sub-dot').textContent=`つけ誤り ${d.error} ／ ${fmtTime(d.min,d.sec)}`; }
-  else { document.getElementById('status-dot').textContent='未実施'; document.getElementById('status-dot').className='task-status'; document.getElementById('sub-dot').textContent='カメラ撮影 → AI採点'; }
+  else { document.getElementById('status-dot').textContent='未実施'; document.getElementById('status-dot').className='task-status'; document.getElementById('sub-dot').textContent='タップして撮影 → AI採点'; }
   [['dir1','方向問題①'],['dir2','方向問題②'],['sign','標識問題']].forEach(([k])=>{
-    const v=session[k]; const st=document.getElementById('status-'+k);
+    const v=session[k]; const st=document.getElementById('status-'+k); const te=taskTimers[k];
     if(v!==null){st.textContent=`正答 ${v.score} ／ ${fmtTime(v.min,v.sec)}`;st.className='task-status done';}
     else{st.textContent='未実施';st.className='task-status';}
+    // インライン入力欄への反映。保存済みならその値を表示。
+    // 未保存の場合は、明示的なリセット時だけ空欄に戻す（他の課題を保存しただけでは
+    // 入力途中の値を消さないようにする）
+    if(v!==null){
+      document.getElementById(k+'-score').value=v.score;
+      document.getElementById(k+'-min').value=v.min||'';
+      document.getElementById(k+'-sec').value=v.sec||'';
+    }else if(resetInputs){
+      document.getElementById(k+'-score').value='';
+      if(te.elapsed>0){
+        document.getElementById(k+'-min').value=Math.floor(te.elapsed/60);
+        document.getElementById(k+'-sec').value=te.elapsed%60;
+      }else{
+        document.getElementById(k+'-min').value='';
+        document.getElementById(k+'-sec').value='';
+      }
+    }
   });
   const any=session.dot||session.dir1!==null||session.dir2!==null||session.sign!==null;
   document.getElementById('btn-go-summary').disabled=!any;
@@ -892,12 +979,14 @@ function showDotResult(imgSrc,data,refUsed){
   }else{
     rowWrap.innerHTML='<span class="row-miss-empty">'+(isErr?'-':'データなし')+'</span>';
   }
-  document.getElementById('dot-miss').textContent=miss; document.getElementById('dot-correct').textContent=correct; document.getElementById('dot-error').textContent=error;
+  document.getElementById('dot-miss').textContent=miss;
+  document.getElementById('dot-correct').value=(typeof correct==='number')?correct:'';
+  document.getElementById('dot-error').value=(typeof error==='number')?error:'';
   document.getElementById('rn-left').textContent=lc; document.getElementById('rn-center').textContent=cc; document.getElementById('rn-right').textContent=rc;
   if(!isErr&&typeof correct==='number'){const t=(lc||0)+(cc||0)+(rc||0)||1;document.getElementById('rf-left').style.width=Math.round(((lc||0)/t)*100)+'%';document.getElementById('rf-center').style.width=Math.round(((cc||0)/t)*100)+'%';document.getElementById('rf-right').style.width=Math.round(((rc||0)/t)*100)+'%';}
   const ni=document.getElementById('dot-ai-note'); if(note){document.getElementById('dot-ai-text').textContent=note;ni.style.display='block';ni.className=isErr?'ai-note err':'ai-note';}else{ni.style.display='none';}
   if(imgSrc){const ri=document.getElementById('preview-img'); /* show in result - no separate img box for brevity */}
-  document.getElementById('dot-min').value=''; document.getElementById('dot-sec').value='';
+  {const te=taskTimers.dot; document.getElementById('dot-min').value=te.elapsed>0?Math.floor(te.elapsed/60):''; document.getElementById('dot-sec').value=te.elapsed>0?te.elapsed%60:'';}
   const badge=document.getElementById('badge-dot'); badge.textContent='未保存'; badge.className='badge';
   document.getElementById('btn-dot-save').disabled=false; document.getElementById('btn-dot-save').className='btn-green';
   currentDotResult={miss,correct,error,leftCorrect:lc,centerCorrect:cc,rightCorrect:rc,rows,note,isErr,total};
@@ -965,14 +1054,27 @@ function renderHistory(){
   wrap.innerHTML='<div class="history-list">'+list.slice().reverse().map(r=>`<div class="history-item"><div class="history-date">${fmtDate(r.date)}</div><div class="history-meta">ドット 見落とし${r.dot?.miss??'-'} つけ誤り${r.dot?.error??'-'} ${fmtTime(r.dot?.min,r.dot?.sec)}<br>方向①${r.dir1?r.dir1.score+'（'+fmtTime(r.dir1.min,r.dir1.sec)+'）':'-'} 方向②${r.dir2?r.dir2.score+'（'+fmtTime(r.dir2.min,r.dir2.sec)+'）':'-'} 標識${r.sign?r.sign.score+'（'+fmtTime(r.sign.min,r.sign.sec)+'）':'-'}</div></div>`).join('')+'</div>';
 }
 
-document.getElementById('card-dot').addEventListener('click',()=>document.getElementById('file-input').click());
+let capturedDotImg=null;
+let retakeMode=false;
+
+document.getElementById('btn-dot-capture').addEventListener('click',()=>{retakeMode=false;document.getElementById('file-input').click();});
 document.getElementById('file-input').addEventListener('change',async e=>{
   const f=e.target.files[0]; if(!f)return;
   const r=new FileReader();
   r.onload=async ev=>{
     try{
       const resized=await resizeImageDataUrl(ev.target.result, 1600, 0.85);
-      runAnalysis(resized);
+      capturedDotImg=resized;
+      if(retakeMode){
+        retakeMode=false;
+        runAnalysis(resized);
+        return;
+      }
+      const st=document.getElementById('dot-capture-status');
+      st.style.display='flex';
+      st.innerHTML=`<img src="${resized}" alt="撮影した写真"><span>撮影済み。「自動採点する」を押してください</span>`;
+      document.getElementById('sub-dot').textContent='撮影済み・採点待ち';
+      document.getElementById('btn-dot-analyze').disabled=false;
     }catch(err){
       alert('写真の読み込みに失敗しました。\n理由: '+err.message);
     }
@@ -981,27 +1083,17 @@ document.getElementById('file-input').addEventListener('change',async e=>{
   r.readAsDataURL(f);
   e.target.value='';
 });
-
-function openManual(task){
-  const v=session[task];
-  document.getElementById(task+'-score').value=v?v.score:'';
-  document.getElementById(task+'-min').value=v?(v.min||''):'';
-  document.getElementById(task+'-sec').value=v?(v.sec||''):'';
-  const b=document.getElementById('badge-'+task);
-  b.textContent=v?`正答 ${v.score}`:'未入力'; b.className=v?'badge done':'badge';
-  show('screen-'+task);
-}
-document.getElementById('card-dir1').addEventListener('click',()=>openManual('dir1'));
-document.getElementById('card-dir2').addEventListener('click',()=>openManual('dir2'));
-document.getElementById('card-sign').addEventListener('click',()=>openManual('sign'));
+document.getElementById('btn-dot-analyze').addEventListener('click',()=>{
+  if(!capturedDotImg)return;
+  runAnalysis(capturedDotImg);
+});
 
 function saveManual(task){
-  const v=parseInt(document.getElementById(task+'-score').value); if(isNaN(v))return;
+  const v=parseInt(document.getElementById(task+'-score').value); if(isNaN(v)){ alert('正答数を入力してください。'); return; }
   const min=parseInt(document.getElementById(task+'-min').value)||0;
   const sec=parseInt(document.getElementById(task+'-sec').value)||0;
   session[task]={score:v,min,sec};
-  const b=document.getElementById('badge-'+task); b.textContent=`正答 ${v}`; b.className='badge done';
-  refreshHome(); show('screen-home');
+  refreshHome();
 }
 document.getElementById('btn-dir1-save').addEventListener('click',()=>saveManual('dir1'));
 document.getElementById('btn-dir2-save').addEventListener('click',()=>saveManual('dir2'));
@@ -1009,29 +1101,41 @@ document.getElementById('btn-sign-save').addEventListener('click',()=>saveManual
 
 document.getElementById('btn-analyzing-back').addEventListener('click',()=>show('screen-home'));
 document.getElementById('btn-dotresult-back').addEventListener('click',()=>show('screen-home'));
-document.getElementById('btn-dir1-back').addEventListener('click',()=>show('screen-home'));
-document.getElementById('btn-dir2-back').addEventListener('click',()=>show('screen-home'));
-document.getElementById('btn-sign-back').addEventListener('click',()=>show('screen-home'));
 document.getElementById('btn-summary-back').addEventListener('click',()=>show('screen-home'));
 document.getElementById('btn-history-back').addEventListener('click',()=>show('screen-home'));
 document.getElementById('btn-settings-back').addEventListener('click',()=>{refreshHome();show('screen-home');});
 
+document.getElementById('dot-correct').addEventListener('input',()=>{
+  const total=getTotalClusters();
+  const v=parseInt(document.getElementById('dot-correct').value);
+  document.getElementById('dot-miss').textContent=isNaN(v)?'-':Math.max(0,total-v);
+});
 document.getElementById('btn-dot-save').addEventListener('click',()=>{
   if(!currentDotResult||currentDotResult.isErr)return;
   const min=parseInt(document.getElementById('dot-min').value)||0, sec=parseInt(document.getElementById('dot-sec').value)||0;
-  session.dot={...currentDotResult,min,sec};
+  // ★画面の入力欄（AIの数値、または手で修正した数値）をそのまま保存する
+  const correct=parseInt(document.getElementById('dot-correct').value);
+  const error=parseInt(document.getElementById('dot-error').value)||0;
+  const total=getTotalClusters();
+  const miss=isNaN(correct)?currentDotResult.miss:Math.max(0,total-correct);
+  session.dot={...currentDotResult,correct:isNaN(correct)?currentDotResult.correct:correct,error,miss,min,sec};
   const badge=document.getElementById('badge-dot'); badge.textContent='保存済み ✓'; badge.className='badge done';
   document.getElementById('btn-dot-save').disabled=true; refreshHome();
 });
-document.getElementById('btn-dot-retake').addEventListener('click',()=>document.getElementById('file-input').click());
+document.getElementById('btn-dot-retake').addEventListener('click',()=>{retakeMode=true;document.getElementById('file-input').click();});
 
 document.getElementById('btn-go-summary').addEventListener('click',()=>{refreshSummary();show('screen-summary');});
 document.getElementById('btn-summary-save').addEventListener('click',()=>{
   const list=loadHistory(); list.push({date:session.date,dot:session.dot,dir1:session.dir1,dir2:session.dir2,sign:session.sign}); saveHistory(list);
   const btn=document.getElementById('btn-summary-save'); btn.innerHTML='<i class="ti ti-bookmark-filled" aria-hidden="true"></i>保存済み'; btn.disabled=true;
 });
-document.getElementById('btn-summary-reset').addEventListener('click',()=>{session=defaultSession();refreshHome();show('screen-home');});
-document.getElementById('btn-new-session').addEventListener('click',()=>{session=defaultSession();refreshHome();});
+function resetDotCapture(){
+  capturedDotImg=null;
+  const st=document.getElementById('dot-capture-status'); st.style.display='none'; st.innerHTML='';
+  document.getElementById('btn-dot-analyze').disabled=true;
+}
+document.getElementById('btn-summary-reset').addEventListener('click',()=>{session=defaultSession();resetAllTimers();resetDotCapture();refreshHome(true);show('screen-home');});
+document.getElementById('btn-new-session').addEventListener('click',()=>{session=defaultSession();resetAllTimers();resetDotCapture();refreshHome(true);});
 document.getElementById('btn-go-history').addEventListener('click',()=>{renderHistory();show('screen-history');});
 document.getElementById('btn-go-settings').addEventListener('click',()=>{refreshSettingsUI();show('screen-settings');});
 document.getElementById('btn-save-apikey').addEventListener('click',()=>{
