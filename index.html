@@ -200,8 +200,8 @@ body { font-family: var(--font-sans); }
 .row-miss-list { display: flex; flex-wrap: wrap; gap: 6px; }
 .row-miss-chip {
   font-size: 12px; padding: 5px 9px;
-  background: #FDEDED; border: 0.5px solid #F0B4B4;
-  border-radius: 20px; color: #A32D2D;
+  background: #E6F1FB; border: 0.5px solid #85B7EB;
+  border-radius: 20px; color: #185FA5;
 }
 .row-miss-empty { font-size: 12px; color: var(--color-text-tertiary); }
 
@@ -536,13 +536,13 @@ body { font-family: var(--font-sans); }
     <div class="result-card e"><div class="val" id="dot-error">-</div><div class="lbl">つけ誤り</div></div>
   </div>
   <div class="region-bar">
-    <div class="region-title">エリア別見落とし</div>
+    <div class="region-title">エリア別正答数（丸の数）</div>
     <div class="region-row"><span class="region-name">左</span><div class="region-track"><div class="region-fill" id="rf-left" style="width:0%"></div></div><span class="region-num" id="rn-left">-</span></div>
     <div class="region-row"><span class="region-name">中</span><div class="region-track"><div class="region-fill" id="rf-center" style="width:0%"></div></div><span class="region-num" id="rn-center">-</span></div>
     <div class="region-row"><span class="region-name">右</span><div class="region-track"><div class="region-fill" id="rf-right" style="width:0%"></div></div><span class="region-num" id="rn-right">-</span></div>
   </div>
   <div class="row-miss-bar">
-    <div class="row-miss-title">行ごとの見落とし</div>
+    <div class="row-miss-title">行ごとの正答数（丸の数）</div>
     <div class="row-miss-list" id="row-miss-list"><span class="row-miss-empty">-</span></div>
   </div>
   <div class="time-area">
@@ -576,6 +576,15 @@ body { font-family: var(--font-sans); }
       <label>正答数</label>
       <input type="number" class="big-input" id="dir1-score" placeholder="0" min="0">
     </div>
+    <div class="input-wrap">
+      <label>所要時間</label>
+      <div class="time-row">
+        <input type="number" class="time-input" id="dir1-min" placeholder="0" min="0" max="99">
+        <span class="time-unit">分</span>
+        <input type="number" class="time-input" id="dir1-sec" placeholder="0" min="0" max="59">
+        <span class="time-unit">秒</span>
+      </div>
+    </div>
     <button class="save-btn" id="btn-dir1-save">保存する</button>
   </div>
 </div>
@@ -593,6 +602,15 @@ body { font-family: var(--font-sans); }
       <label>正答数</label>
       <input type="number" class="big-input" id="dir2-score" placeholder="0" min="0">
     </div>
+    <div class="input-wrap">
+      <label>所要時間</label>
+      <div class="time-row">
+        <input type="number" class="time-input" id="dir2-min" placeholder="0" min="0" max="99">
+        <span class="time-unit">分</span>
+        <input type="number" class="time-input" id="dir2-sec" placeholder="0" min="0" max="59">
+        <span class="time-unit">秒</span>
+      </div>
+    </div>
     <button class="save-btn" id="btn-dir2-save">保存する</button>
   </div>
 </div>
@@ -609,6 +627,15 @@ body { font-family: var(--font-sans); }
     <div class="input-wrap">
       <label>正答数</label>
       <input type="number" class="big-input" id="sign-score" placeholder="0" min="0">
+    </div>
+    <div class="input-wrap">
+      <label>所要時間</label>
+      <div class="time-row">
+        <input type="number" class="time-input" id="sign-min" placeholder="0" min="0" max="99">
+        <span class="time-unit">分</span>
+        <input type="number" class="time-input" id="sign-sec" placeholder="0" min="0" max="59">
+        <span class="time-unit">秒</span>
+      </div>
     </div>
     <button class="save-btn" id="btn-sign-save">保存する</button>
   </div>
@@ -634,18 +661,21 @@ body { font-family: var(--font-sans); }
       <div class="sum-card-name">方向問題①</div>
       <div class="sum-vals">
         <div class="sum-val ok"><div class="v" id="s-dir1">-</div><div class="l">正答数</div></div>
+        <div class="sum-val"><div class="v" id="s-dir1-time">-</div><div class="l">所要時間</div></div>
       </div>
     </div>
     <div class="sum-card">
       <div class="sum-card-name">方向問題②</div>
       <div class="sum-vals">
         <div class="sum-val ok"><div class="v" id="s-dir2">-</div><div class="l">正答数</div></div>
+        <div class="sum-val"><div class="v" id="s-dir2-time">-</div><div class="l">所要時間</div></div>
       </div>
     </div>
     <div class="sum-card">
       <div class="sum-card-name">標識問題</div>
       <div class="sum-vals">
         <div class="sum-val ok"><div class="v" id="s-sign">-</div><div class="l">正答数</div></div>
+        <div class="sum-val"><div class="v" id="s-sign-time">-</div><div class="l">所要時間</div></div>
       </div>
     </div>
     <div class="sec-title" style="margin-top:18px;">合否判定</div>
@@ -692,6 +722,14 @@ body { font-family: var(--font-sans); }
     <div class="api-status none" id="api-key-status">未設定</div>
   </div>
   <div class="ref-section">
+    <label>4点クラスターの総数（正解の総数）</label>
+    <div class="api-key-row">
+      <input type="number" class="api-key-input" id="total-clusters-input" placeholder="202" min="0" style="font-family:inherit;font-size:14px;">
+      <button class="api-save-btn" id="btn-save-total">保存</button>
+    </div>
+    <div class="api-status" id="total-clusters-status">未設定（デフォルト202を使用中）</div>
+  </div>
+  <div class="ref-section">
     <label>正解例（赤ペンでマークした用紙）</label>
     <div class="ref-preview" id="ref-paper-preview">
       <img id="ref-paper-img" alt="正解例">
@@ -717,7 +755,7 @@ body { font-family: var(--font-sans); }
 </div>
 
 <script>
-const K_HISTORY='drv_history', K_APIKEY='drv_apikey', K_REFPAPER='drv_refpaper';
+const K_HISTORY='drv_history', K_APIKEY='drv_apikey', K_REFPAPER='drv_refpaper', K_TOTAL='drv_total_clusters';
 
 const defaultSession=()=>({ date:new Date().toISOString(), dot:null, dir1:null, dir2:null, sign:null });
 let session=defaultSession();
@@ -732,6 +770,8 @@ function getApiKey(){ return localStorage.getItem(K_APIKEY)||''; }
 function setApiKey(k){ localStorage.setItem(K_APIKEY,k); }
 function getRefPaper(){ return localStorage.getItem(K_REFPAPER)||''; }
 function setRefPaper(d){ localStorage.setItem(K_REFPAPER,d); }
+function getTotalClusters(){ const v=parseInt(localStorage.getItem(K_TOTAL)); return isNaN(v)?202:v; }
+function setTotalClusters(v){ localStorage.setItem(K_TOTAL,String(v)); }
 
 // 写真（data URL）を指定した最大サイズ・画質に縮小するユーティリティ
 // iPadのカメラ写真は数MBあり、そのまま保存すると端末の保存容量上限(localStorage)を
@@ -762,7 +802,7 @@ function refreshHome(){
   else { document.getElementById('status-dot').textContent='未実施'; document.getElementById('status-dot').className='task-status'; document.getElementById('sub-dot').textContent='カメラ撮影 → AI採点'; }
   [['dir1','方向問題①'],['dir2','方向問題②'],['sign','標識問題']].forEach(([k])=>{
     const v=session[k]; const st=document.getElementById('status-'+k);
-    if(v!==null){st.textContent=`正答 ${v}`;st.className='task-status done';}
+    if(v!==null){st.textContent=`正答 ${v.score} ／ ${fmtTime(v.min,v.sec)}`;st.className='task-status done';}
     else{st.textContent='未実施';st.className='task-status';}
   });
   const any=session.dot||session.dir1!==null||session.dir2!==null||session.sign!==null;
@@ -776,6 +816,10 @@ function refreshSettingsUI(){
   const ref=getRefPaper(), ri=document.getElementById('ref-paper-img'), rph=document.getElementById('ref-paper-ph'), rst=document.getElementById('ref-paper-status');
   if(ref){ri.src=ref;ri.style.display='block';rph.style.display='none';rst.textContent='登録済み ✓';rst.className='ref-status ok';}
   else{ri.style.display='none';rph.style.display='flex';rst.textContent='未登録（登録すると精度が上がります）';rst.className='ref-status none';}
+  const total=getTotalClusters(), tInput=document.getElementById('total-clusters-input'), tSt=document.getElementById('total-clusters-status');
+  tInput.value=total;
+  tSt.textContent=localStorage.getItem(K_TOTAL)?`設定済み ✓（${total}個）`:`未設定（デフォルト${total}を使用中）`;
+  tSt.className=localStorage.getItem(K_TOTAL)?'api-status ok':'api-status none';
 }
 
 // ★修正箇所: 精度を優先し、軽量版(flash-lite)ではなく通常のgemini-3.6-flashを使用
@@ -784,12 +828,16 @@ const GEMINI_MODEL = 'gemini-3.6-flash';
 
 async function callGemini(imgSrc,refSrc){
   const apiKey=getApiKey(); if(!apiKey)throw new Error('APIキーが未設定です');
+  const total=getTotalClusters();
   const parts=[];
   if(refSrc){parts.push({inline_data:{mime_type:'image/jpeg',data:refSrc.split(',')[1]}});parts.push({text:'これが正解例です。赤いペンで丸がついている場所が「4点クラスター」の正解位置です。'});}
   parts.push({inline_data:{mime_type:'image/jpeg',data:imgSrc.split(',')[1]}});
+  // ★修正箇所: 「見落とし数」をAIに直接聞くのをやめ、「実際に丸がついている数（正答数）」だけを
+  // 数えさせる方式に変更。見落とし数は 総数(${total}) − 正答数 でアプリ側が自動計算する。
+  // AIは「ないものを探す」より「あるものを数える」方が精度が出やすいための工夫。
   const prompt=refSrc
-    ?`これが受検者の回答済み用紙です。赤いペンで丸がついています。\n【ルール】用紙には2点・3点・4点の点のかたまりが混在。正解は「4点クラスター」だけに丸をつけること。\n【採点基準】正答:4点クラスターに赤丸あり。見落とし:4点クラスターに赤丸なし（正解例と比較）。つけ誤り:2点または3点クラスターに赤丸。\n【手順】まず用紙を上から下へ行ごとに区切ってください。次に各行を左から右へ1つずつ点群を確認し、4点クラスターかどうか・赤丸があるかどうかを個別に判定してください。焦って全体を一目で判断せず、行ごとに数えてから合計してください。\n用紙を左・中・右のエリアに分けて集計し、さらに行ごとの見落とし数も数えてください（点群が存在する行のみ、上から1,2,3…と番号を振る）。JSONのみで回答:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"rows":[{"row":行番号,"miss":その行の見落とし数,"error":その行のつけ誤り数}],"note":"日本語20字以内"}`
-    :`これは4点クラスター探索検査の回答済み用紙。受検者は赤ペンで丸をつけています。\n【ルール】4点クラスターだけが正解。2点・3点クラスターへの丸はつけ誤り。\n【手順】まず用紙を上から下へ行ごとに区切ってください。次に各行を左から右へ1つずつ点群を確認し、4点クラスターかどうか・赤丸があるかどうかを個別に判定してください。焦って全体を一目で判断せず、行ごとに数えてから合計してください。\n用紙を左・中・右のエリアに分けて集計し（正解例なしのため見落としは推定）、さらに行ごとの見落とし数も数えてください（点群が存在する行のみ、上から1,2,3…と番号を振る）。JSONのみ:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"rows":[{"row":行番号,"miss":その行の見落とし数,"error":その行のつけ誤り数}],"note":"日本語20字以内"}`;
+    ?`これが受検者の回答済み用紙です。赤いペンで丸がついています。この用紙には「4点クラスター」が全部で${total}個含まれています。\n【ルール】用紙には2点・3点・4点の点のかたまりが混在。正解は「4点クラスター」だけに丸をつけること。\n【数える対象】correct: 4点クラスターに赤丸がついている数（見落としではなく、実際に丸がついている数だけを数える）。error: 2点または3点クラスターに赤丸がついている数（つけ誤り）。\n【手順】まず用紙を上から下へ行ごとに区切ってください。次に各行を左から右へ1つずつ点群を確認し、4点クラスターに赤丸がついているか・2点3点クラスターに誤って赤丸がついていないかを個別に判定してください。焦って全体を一目で判断せず、行ごとに数えてから合計してください。見落とし数（丸がついていない4点クラスターの数）は答えなくてよい。\n用紙を左・中・右のエリアごとの正答数（丸がついている数）と、行ごとの正答数・つけ誤り数も数えてください（点群が存在する行のみ、上から1,2,3…と番号を振る）。JSONのみで回答:\n{"correct":数値,"error":数値,"left_correct":数値,"center_correct":数値,"right_correct":数値,"rows":[{"row":行番号,"correct":その行の正答数,"error":その行のつけ誤り数}],"note":"日本語20字以内"}`
+    :`これは4点クラスター探索検査の回答済み用紙。受検者は赤ペンで丸をつけています。この用紙には「4点クラスター」が全部で${total}個含まれています。\n【ルール】4点クラスターだけが正解。2点・3点クラスターへの丸はつけ誤り。\n【数える対象】correct: 4点クラスターに赤丸がついている数（見落としではなく、実際に丸がついている数だけを数える）。error: 2点または3点クラスターに赤丸がついている数（つけ誤り）。\n【手順】まず用紙を上から下へ行ごとに区切ってください。次に各行を左から右へ1つずつ点群を確認し、4点クラスターに赤丸がついているか・2点3点クラスターに誤って赤丸がついていないかを個別に判定してください。焦って全体を一目で判断せず、行ごとに数えてから合計してください。見落とし数は答えなくてよい。\n用紙を左・中・右のエリアごとの正答数（丸がついている数）と、行ごとの正答数・つけ誤り数も数えてください（点群が存在する行のみ、上から1,2,3…と番号を振る）。JSONのみ:\n{"correct":数値,"error":数値,"left_correct":数値,"center_correct":数値,"right_correct":数値,"rows":[{"row":行番号,"correct":その行の正答数,"error":その行のつけ誤り数}],"note":"日本語20字以内"}`;
   parts.push({text:prompt});
   const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`APIエラー(${res.status})`);}
@@ -825,25 +873,34 @@ function showDotResult(imgSrc,data,refUsed){
   const refEl=document.getElementById('dot-ref-used');
   refEl.textContent=refUsed?'使用しました ✓':'未使用（設定で未登録）';
   refEl.style.color=refUsed?'#0F6E56':'#BA7517';
-  let miss='-',correct='-',error='-',lm='-',cm='-',rm='-',note='',isErr=false,rows=[];
-  if(data&&!data._error){miss=data.miss??'-';correct=data.correct??'-';error=data.error??'-';lm=data.left_miss??'-';cm=data.center_miss??'-';rm=data.right_miss??'-';note=data.note||'';rows=Array.isArray(data.rows)?data.rows:[];}
+  const total=getTotalClusters();
+  let miss='-',correct='-',error='-',lc='-',cc='-',rc='-',note='',isErr=false,rows=[];
+  if(data&&!data._error){
+    correct=typeof data.correct==='number'?data.correct:'-';
+    error=data.error??'-';
+    lc=data.left_correct??'-'; cc=data.center_correct??'-'; rc=data.right_correct??'-';
+    note=data.note||'';
+    rows=Array.isArray(data.rows)?data.rows:[];
+    // ★見落とし数はAIに聞かず、総数(${total}) - 正答数 で自動計算
+    miss=(typeof correct==='number')?Math.max(0,total-correct):'-';
+  }
   else if(data?._error){isErr=true;note=data._error;}
   const rowWrap=document.getElementById('row-miss-list');
-  const rowsWithMiss=rows.filter(r=>r&&typeof r.miss==='number'&&r.miss>0);
-  if(rowsWithMiss.length){
-    rowWrap.innerHTML=rowsWithMiss.map(r=>`<span class="row-miss-chip">${r.row}行目 ${r.miss}個</span>`).join('');
+  const rowsWithData=rows.filter(r=>r&&(typeof r.correct==='number'||typeof r.error==='number'));
+  if(rowsWithData.length){
+    rowWrap.innerHTML=rowsWithData.map(r=>`<span class="row-miss-chip">${r.row}行目 正答${r.correct??0}${r.error?`／誤${r.error}`:''}</span>`).join('');
   }else{
-    rowWrap.innerHTML='<span class="row-miss-empty">'+(isErr?'-':'見落としなし、またはデータなし')+'</span>';
+    rowWrap.innerHTML='<span class="row-miss-empty">'+(isErr?'-':'データなし')+'</span>';
   }
   document.getElementById('dot-miss').textContent=miss; document.getElementById('dot-correct').textContent=correct; document.getElementById('dot-error').textContent=error;
-  document.getElementById('rn-left').textContent=lm; document.getElementById('rn-center').textContent=cm; document.getElementById('rn-right').textContent=rm;
-  if(!isErr&&typeof miss==='number'){const t=(lm||0)+(cm||0)+(rm||0)||1;document.getElementById('rf-left').style.width=Math.round(((lm||0)/t)*100)+'%';document.getElementById('rf-center').style.width=Math.round(((cm||0)/t)*100)+'%';document.getElementById('rf-right').style.width=Math.round(((rm||0)/t)*100)+'%';}
+  document.getElementById('rn-left').textContent=lc; document.getElementById('rn-center').textContent=cc; document.getElementById('rn-right').textContent=rc;
+  if(!isErr&&typeof correct==='number'){const t=(lc||0)+(cc||0)+(rc||0)||1;document.getElementById('rf-left').style.width=Math.round(((lc||0)/t)*100)+'%';document.getElementById('rf-center').style.width=Math.round(((cc||0)/t)*100)+'%';document.getElementById('rf-right').style.width=Math.round(((rc||0)/t)*100)+'%';}
   const ni=document.getElementById('dot-ai-note'); if(note){document.getElementById('dot-ai-text').textContent=note;ni.style.display='block';ni.className=isErr?'ai-note err':'ai-note';}else{ni.style.display='none';}
   if(imgSrc){const ri=document.getElementById('preview-img'); /* show in result - no separate img box for brevity */}
   document.getElementById('dot-min').value=''; document.getElementById('dot-sec').value='';
   const badge=document.getElementById('badge-dot'); badge.textContent='未保存'; badge.className='badge';
   document.getElementById('btn-dot-save').disabled=false; document.getElementById('btn-dot-save').className='btn-green';
-  currentDotResult={miss,correct,error,leftMiss:lm,centerMiss:cm,rightMiss:rm,rows,note,isErr};
+  currentDotResult={miss,correct,error,leftCorrect:lc,centerCorrect:cc,rightCorrect:rc,rows,note,isErr,total};
   show('screen-dot-result');
 }
 
@@ -852,9 +909,12 @@ function refreshSummary(){
   document.getElementById('s-dot-miss').textContent=d?d.miss:'-';
   document.getElementById('s-dot-error').textContent=d?d.error:'-';
   document.getElementById('s-dot-time').textContent=d?fmtTime(d.min,d.sec):'-';
-  document.getElementById('s-dir1').textContent=session.dir1!==null?session.dir1:'-';
-  document.getElementById('s-dir2').textContent=session.dir2!==null?session.dir2:'-';
-  document.getElementById('s-sign').textContent=session.sign!==null?session.sign:'-';
+  document.getElementById('s-dir1').textContent=session.dir1?session.dir1.score:'-';
+  document.getElementById('s-dir1-time').textContent=session.dir1?fmtTime(session.dir1.min,session.dir1.sec):'-';
+  document.getElementById('s-dir2').textContent=session.dir2?session.dir2.score:'-';
+  document.getElementById('s-dir2-time').textContent=session.dir2?fmtTime(session.dir2.min,session.dir2.sec):'-';
+  document.getElementById('s-sign').textContent=session.sign?session.sign.score:'-';
+  document.getElementById('s-sign-time').textContent=session.sign?fmtTime(session.sign.min,session.sign.sec):'-';
 
   // 変数定義
   // a = 所要時間（秒に換算）
@@ -866,8 +926,8 @@ function refreshSummary(){
   const a = d ? (d.min||0)*60 + (d.sec||0) : null;
   const b = d ? (typeof d.miss==='number' ? d.miss : null) : null;
   const c = d ? (typeof d.error==='number' ? d.error : null) : null;
-  const eVal = session.dir2;
-  const fVal = session.sign;
+  const eVal = session.dir2 ? session.dir2.score : null;
+  const fVal = session.sign ? session.sign.score : null;
 
   const passEl=document.getElementById('score-pass');
   const failEl=document.getElementById('score-fail');
@@ -902,7 +962,7 @@ function refreshSummary(){
 function renderHistory(){
   const list=loadHistory(), wrap=document.getElementById('history-list-wrap');
   if(!list.length){wrap.innerHTML='<div class="history-empty">検査履歴はまだありません。<br>集計画面から「履歴に保存」で記録されます。</div>';return;}
-  wrap.innerHTML='<div class="history-list">'+list.slice().reverse().map(r=>`<div class="history-item"><div class="history-date">${fmtDate(r.date)}</div><div class="history-meta">ドット 見落とし${r.dot?.miss??'-'} つけ誤り${r.dot?.error??'-'} ${fmtTime(r.dot?.min,r.dot?.sec)}<br>方向①${r.dir1??'-'} 方向②${r.dir2??'-'} 標識${r.sign??'-'}</div></div>`).join('')+'</div>';
+  wrap.innerHTML='<div class="history-list">'+list.slice().reverse().map(r=>`<div class="history-item"><div class="history-date">${fmtDate(r.date)}</div><div class="history-meta">ドット 見落とし${r.dot?.miss??'-'} つけ誤り${r.dot?.error??'-'} ${fmtTime(r.dot?.min,r.dot?.sec)}<br>方向①${r.dir1?r.dir1.score+'（'+fmtTime(r.dir1.min,r.dir1.sec)+'）':'-'} 方向②${r.dir2?r.dir2.score+'（'+fmtTime(r.dir2.min,r.dir2.sec)+'）':'-'} 標識${r.sign?r.sign.score+'（'+fmtTime(r.sign.min,r.sign.sec)+'）':'-'}</div></div>`).join('')+'</div>';
 }
 
 document.getElementById('card-dot').addEventListener('click',()=>document.getElementById('file-input').click());
@@ -923,9 +983,12 @@ document.getElementById('file-input').addEventListener('change',async e=>{
 });
 
 function openManual(task){
-  document.getElementById(task+'-score').value=session[task]??'';
+  const v=session[task];
+  document.getElementById(task+'-score').value=v?v.score:'';
+  document.getElementById(task+'-min').value=v?(v.min||''):'';
+  document.getElementById(task+'-sec').value=v?(v.sec||''):'';
   const b=document.getElementById('badge-'+task);
-  b.textContent=session[task]!==null?`正答 ${session[task]}`:'未入力'; b.className=session[task]!==null?'badge done':'badge';
+  b.textContent=v?`正答 ${v.score}`:'未入力'; b.className=v?'badge done':'badge';
   show('screen-'+task);
 }
 document.getElementById('card-dir1').addEventListener('click',()=>openManual('dir1'));
@@ -934,7 +997,9 @@ document.getElementById('card-sign').addEventListener('click',()=>openManual('si
 
 function saveManual(task){
   const v=parseInt(document.getElementById(task+'-score').value); if(isNaN(v))return;
-  session[task]=v;
+  const min=parseInt(document.getElementById(task+'-min').value)||0;
+  const sec=parseInt(document.getElementById(task+'-sec').value)||0;
+  session[task]={score:v,min,sec};
   const b=document.getElementById('badge-'+task); b.textContent=`正答 ${v}`; b.className='badge done';
   refreshHome(); show('screen-home');
 }
@@ -972,6 +1037,10 @@ document.getElementById('btn-go-settings').addEventListener('click',()=>{refresh
 document.getElementById('btn-save-apikey').addEventListener('click',()=>{
   const val=document.getElementById('api-key-input').value.trim(); if(!val)return;
   setApiKey(val); const st=document.getElementById('api-key-status'); st.textContent='保存しました ✓'; st.className='api-status ok';
+});
+document.getElementById('btn-save-total').addEventListener('click',()=>{
+  const v=parseInt(document.getElementById('total-clusters-input').value); if(isNaN(v)||v<0)return;
+  setTotalClusters(v); refreshSettingsUI();
 });
 document.getElementById('ref-paper-preview').addEventListener('click',()=>document.getElementById('ref-input').click());
 document.getElementById('ref-input').addEventListener('change',e=>{
