@@ -195,6 +195,16 @@ body { font-family: var(--font-sans); }
 .region-fill  { height: 100%; background: #F09595; border-radius: 3px; transition: width 0.5s; }
 .region-num   { font-size: 12px; font-weight: 500; color: #A32D2D; min-width: 18px; text-align: right; }
 
+.row-miss-bar { padding: 10px 16px; border-bottom: 0.5px solid var(--color-border-tertiary); }
+.row-miss-title { font-size: 12px; color: var(--color-text-tertiary); margin-bottom: 7px; }
+.row-miss-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.row-miss-chip {
+  font-size: 12px; padding: 5px 9px;
+  background: #FDEDED; border: 0.5px solid #F0B4B4;
+  border-radius: 20px; color: #A32D2D;
+}
+.row-miss-empty { font-size: 12px; color: var(--color-text-tertiary); }
+
 .time-area {
   padding: 10px 16px; border-bottom: 0.5px solid var(--color-border-tertiary);
 }
@@ -513,6 +523,9 @@ body { font-family: var(--font-sans); }
   <div class="result-topbar">
     <span>AI採点結果</span><small id="dot-result-date"></small>
   </div>
+  <div class="result-topbar" style="padding-top:0;border-bottom:0.5px solid var(--color-border-tertiary);">
+    <span>正解例</span><small id="dot-ref-used">-</small>
+  </div>
   <div class="result-hero">
     <div class="miss-label">見落とし</div>
     <div class="miss-number" id="dot-miss">-</div>
@@ -527,6 +540,10 @@ body { font-family: var(--font-sans); }
     <div class="region-row"><span class="region-name">左</span><div class="region-track"><div class="region-fill" id="rf-left" style="width:0%"></div></div><span class="region-num" id="rn-left">-</span></div>
     <div class="region-row"><span class="region-name">中</span><div class="region-track"><div class="region-fill" id="rf-center" style="width:0%"></div></div><span class="region-num" id="rn-center">-</span></div>
     <div class="region-row"><span class="region-name">右</span><div class="region-track"><div class="region-fill" id="rf-right" style="width:0%"></div></div><span class="region-num" id="rn-right">-</span></div>
+  </div>
+  <div class="row-miss-bar">
+    <div class="row-miss-title">行ごとの見落とし</div>
+    <div class="row-miss-list" id="row-miss-list"><span class="row-miss-empty">-</span></div>
   </div>
   <div class="time-area">
     <label>所要時間（手入力）</label>
@@ -740,9 +757,9 @@ function refreshSettingsUI(){
   else{ri.style.display='none';rph.style.display='flex';rst.textContent='未登録（登録すると精度が上がります）';rst.className='ref-status none';}
 }
 
-// ★修正箇所: gemini-1.5-flash（廃止済み・404エラーの原因）→ gemini-3.1-flash-lite に変更
-// gemini-3.1-flash-lite は2027年5月まで停止予定なしのため、当面安心して使えます
-const GEMINI_MODEL = 'gemini-3.1-flash-lite';
+// ★修正箇所: 精度を優先し、軽量版(flash-lite)ではなく通常のgemini-3.6-flashを使用
+// 1回の検査で1回しか呼ばないため、料金差はごくわずか
+const GEMINI_MODEL = 'gemini-3.6-flash';
 
 async function callGemini(imgSrc,refSrc){
   const apiKey=getApiKey(); if(!apiKey)throw new Error('APIキーが未設定です');
@@ -750,8 +767,8 @@ async function callGemini(imgSrc,refSrc){
   if(refSrc){parts.push({inline_data:{mime_type:'image/jpeg',data:refSrc.split(',')[1]}});parts.push({text:'これが正解例です。赤いペンで丸がついている場所が「4点クラスター」の正解位置です。'});}
   parts.push({inline_data:{mime_type:'image/jpeg',data:imgSrc.split(',')[1]}});
   const prompt=refSrc
-    ?`これが受検者の回答済み用紙です。赤いペンで丸がついています。\n【ルール】用紙には2点・3点・4点の点のかたまりが混在。正解は「4点クラスター」だけに丸をつけること。\n【採点基準】正答:4点クラスターに赤丸あり。見落とし:4点クラスターに赤丸なし（正解例と比較）。つけ誤り:2点または3点クラスターに赤丸。\n用紙を左・中・右に分けて採点。JSONのみで回答:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"note":"日本語20字以内"}`
-    :`これは4点クラスター探索検査の回答済み用紙。受検者は赤ペンで丸をつけています。\n【ルール】4点クラスターだけが正解。2点・3点クラスターへの丸はつけ誤り。\n用紙を左・中・右に分けて採点（正解例なしのため見落としは推定）。JSONのみ:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"note":"日本語20字以内"}`;
+    ?`これが受検者の回答済み用紙です。赤いペンで丸がついています。\n【ルール】用紙には2点・3点・4点の点のかたまりが混在。正解は「4点クラスター」だけに丸をつけること。\n【採点基準】正答:4点クラスターに赤丸あり。見落とし:4点クラスターに赤丸なし（正解例と比較）。つけ誤り:2点または3点クラスターに赤丸。\n【手順】まず用紙を上から下へ行ごとに区切ってください。次に各行を左から右へ1つずつ点群を確認し、4点クラスターかどうか・赤丸があるかどうかを個別に判定してください。焦って全体を一目で判断せず、行ごとに数えてから合計してください。\n用紙を左・中・右のエリアに分けて集計し、さらに行ごとの見落とし数も数えてください（点群が存在する行のみ、上から1,2,3…と番号を振る）。JSONのみで回答:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"rows":[{"row":行番号,"miss":その行の見落とし数,"error":その行のつけ誤り数}],"note":"日本語20字以内"}`
+    :`これは4点クラスター探索検査の回答済み用紙。受検者は赤ペンで丸をつけています。\n【ルール】4点クラスターだけが正解。2点・3点クラスターへの丸はつけ誤り。\n【手順】まず用紙を上から下へ行ごとに区切ってください。次に各行を左から右へ1つずつ点群を確認し、4点クラスターかどうか・赤丸があるかどうかを個別に判定してください。焦って全体を一目で判断せず、行ごとに数えてから合計してください。\n用紙を左・中・右のエリアに分けて集計し（正解例なしのため見落としは推定）、さらに行ごとの見落とし数も数えてください（点群が存在する行のみ、上から1,2,3…と番号を振る）。JSONのみ:\n{"correct":数値,"miss":数値,"error":数値,"left_miss":数値,"center_miss":数値,"right_miss":数値,"rows":[{"row":行番号,"miss":その行の見落とし数,"error":その行のつけ誤り数}],"note":"日本語20字以内"}`;
   parts.push({text:prompt});
   const res=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({contents:[{parts}]})});
   if(!res.ok){const e=await res.json().catch(()=>({}));throw new Error(e?.error?.message||`APIエラー(${res.status})`);}
@@ -766,23 +783,35 @@ function runAnalysis(imgSrc){
   const prev=document.getElementById('preview-img'); prev.src=imgSrc; prev.style.display='block'; document.getElementById('preview-ph').style.display='none';
   for(let n=1;n<=5;n++){const el=document.getElementById('step-'+n);el.className='step-item';el.querySelector('.step-dot').textContent='';}
   let i=0, gp=null;
+  const refPaper=getRefPaper();
+  const refUsedThisRun=!!refPaper;
   function tick(){
     if(i>0){const pe=document.getElementById('step-'+i);pe.className='step-item done';pe.querySelector('.step-dot').textContent='✓';}
     if(i<5){
       i++; document.getElementById('step-'+i).className='step-item active'; document.getElementById('analyzing-label').textContent=stepLabels[i-1];
-      if(i===4){gp=callGemini(imgSrc,getRefPaper()).catch(e=>({_error:e.message}));}
+      if(i===4){gp=callGemini(imgSrc,refPaper).catch(e=>({_error:e.message}));}
       if(i<5){setTimeout(tick,700);}
-      else{gp.then(result=>{const el5=document.getElementById('step-5');el5.className='step-item done';el5.querySelector('.step-dot').textContent='✓';document.getElementById('analyzing-label').textContent='完了';setTimeout(()=>showDotResult(imgSrc,result),400);});}
+      else{gp.then(result=>{const el5=document.getElementById('step-5');el5.className='step-item done';el5.querySelector('.step-dot').textContent='✓';document.getElementById('analyzing-label').textContent='完了';setTimeout(()=>showDotResult(imgSrc,result,refUsedThisRun),400);});}
     }
   }
   tick();
 }
 
-function showDotResult(imgSrc,data){
+function showDotResult(imgSrc,data,refUsed){
   document.getElementById('dot-result-date').textContent=fmtDate(new Date());
-  let miss='-',correct='-',error='-',lm='-',cm='-',rm='-',note='',isErr=false;
-  if(data&&!data._error){miss=data.miss??'-';correct=data.correct??'-';error=data.error??'-';lm=data.left_miss??'-';cm=data.center_miss??'-';rm=data.right_miss??'-';note=data.note||'';}
+  const refEl=document.getElementById('dot-ref-used');
+  refEl.textContent=refUsed?'使用しました ✓':'未使用（設定で未登録）';
+  refEl.style.color=refUsed?'#0F6E56':'#BA7517';
+  let miss='-',correct='-',error='-',lm='-',cm='-',rm='-',note='',isErr=false,rows=[];
+  if(data&&!data._error){miss=data.miss??'-';correct=data.correct??'-';error=data.error??'-';lm=data.left_miss??'-';cm=data.center_miss??'-';rm=data.right_miss??'-';note=data.note||'';rows=Array.isArray(data.rows)?data.rows:[];}
   else if(data?._error){isErr=true;note=data._error;}
+  const rowWrap=document.getElementById('row-miss-list');
+  const rowsWithMiss=rows.filter(r=>r&&typeof r.miss==='number'&&r.miss>0);
+  if(rowsWithMiss.length){
+    rowWrap.innerHTML=rowsWithMiss.map(r=>`<span class="row-miss-chip">${r.row}行目 ${r.miss}個</span>`).join('');
+  }else{
+    rowWrap.innerHTML='<span class="row-miss-empty">'+(isErr?'-':'見落としなし、またはデータなし')+'</span>';
+  }
   document.getElementById('dot-miss').textContent=miss; document.getElementById('dot-correct').textContent=correct; document.getElementById('dot-error').textContent=error;
   document.getElementById('rn-left').textContent=lm; document.getElementById('rn-center').textContent=cm; document.getElementById('rn-right').textContent=rm;
   if(!isErr&&typeof miss==='number'){const t=(lm||0)+(cm||0)+(rm||0)||1;document.getElementById('rf-left').style.width=Math.round(((lm||0)/t)*100)+'%';document.getElementById('rf-center').style.width=Math.round(((cm||0)/t)*100)+'%';document.getElementById('rf-right').style.width=Math.round(((rm||0)/t)*100)+'%';}
@@ -791,7 +820,7 @@ function showDotResult(imgSrc,data){
   document.getElementById('dot-min').value=''; document.getElementById('dot-sec').value='';
   const badge=document.getElementById('badge-dot'); badge.textContent='未保存'; badge.className='badge';
   document.getElementById('btn-dot-save').disabled=false; document.getElementById('btn-dot-save').className='btn-green';
-  currentDotResult={miss,correct,error,leftMiss:lm,centerMiss:cm,rightMiss:rm,note,isErr};
+  currentDotResult={miss,correct,error,leftMiss:lm,centerMiss:cm,rightMiss:rm,rows,note,isErr};
   show('screen-dot-result');
 }
 
